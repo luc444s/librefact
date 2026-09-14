@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Librefact\GreenterAdapter\Http;
 
+use Librefact\GreenterAdapter\Validation\EmitDocumentPayloadValidator;
+
 final class EmitDocumentEndpoint
 {
     /**
@@ -23,7 +25,20 @@ final class EmitDocumentEndpoint
             ];
         }
 
-        $document = $payload['document'] ?? [];
+        $errors = (new EmitDocumentPayloadValidator())->validate($payload);
+        if ($errors !== []) {
+            return [
+                'status_code' => 400,
+                'body' => [
+                    'success' => false,
+                    'status' => 'invalid_request',
+                    'provider' => 'PE_SUNAT_GREENTER',
+                    'errors' => $errors,
+                ],
+            ];
+        }
+
+        $document = $payload['document'];
 
         return [
             'status_code' => 202,
