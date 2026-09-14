@@ -1,0 +1,37 @@
+{
+  "tax_authority": {
+    "country": "PE",
+    "code": "SUNAT",
+    "provider": "greenter"
+  },
+  "document": {
+    "type": "invoice",
+    "serie": "F001",
+    "number": 1,
+    "currency": "PEN",
+    "issue_date": "2026-09-14"
+  },
+  "issuer": {
+    "ruc": "20123456789",
+    "legal_name": "LIBREFACT DEMO SAC"
+  },
+  "customer": {
+    "document_type": "6",
+    "document_number": "20601234567",
+    "legal_name": "CLIENTE DEMO SAC"
+  },
+  "items": [
+    {
+      "description": "Servicio demo",
+      "quantity": 1,
+      "unit_value": 100,
+      "igv": 18,
+      "total": 118
+    }
+  ],
+  "totals": {
+    "taxable": 100,
+    "igv": 18,
+    "total": 118
+  }
+}
