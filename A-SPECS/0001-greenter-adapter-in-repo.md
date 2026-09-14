@@ -174,7 +174,7 @@ structural_constraints:
 - Requirement: Librefact Spec 0.1 must make Greenter live inside the repo as a testable adapter foundation.
 - owner: Lucas
 - approver: Lucas
-- Commit:
+- Commit: 54d8de93e764965aace6c35048ed3a877670af3c
 - Deployment: local repository only; no runtime deployment in this A.SPEC.
 
 ## Definition of Done
