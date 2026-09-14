@@ -1,0 +1,16 @@
+{
+  "name": "librefact/greenter-adapter",
+  "description": "Internal PHP adapter boundary for Greenter inside Librefact.",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.4",
+    "greenter/greenter": "^5.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.6"
+  },
+  "scripts": {
+    "test": "phpunit --colors=always tests"
+  }
+}
