@@ -250,15 +250,16 @@ structural_constraints:
 - Requirement: Librefact must generate local unsigned UBL XML from a valid Greenter invoice object before signing or SUNAT submission.
 - owner: Lucas
 - approver: Lucas
-- Commit:
+- Commit: `906f709203b9b226692781eab3ba3b6d26ebb109`
+- TRACE: `VERDICT: GAP` for deployment only; `spec -> commit`, `commit -> code`, and `commit -> test` were backed by repo facts, with no failed checks.
 - Deployment: local repository only; no runtime deployment in this A.SPEC.
 
 ## Definition of Done
 
-- [ ] Objective satisfied
-- [ ] Scope respected
-- [ ] Contract satisfied
-- [ ] Invariants checked
-- [ ] Tests pass
-- [ ] Rollback documented
-- [ ] No prohibited paths changed
+- [x] Objective satisfied
+- [x] Scope respected
+- [x] Contract satisfied
+- [x] Invariants checked
+- [x] Tests pass
+- [x] Rollback documented
+- [x] No prohibited paths changed

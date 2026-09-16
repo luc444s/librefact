@@ -265,15 +265,16 @@ structural_constraints:
 - Requirement: Librefact must sign locally generated UBL XML with test certificate material before any SUNAT submission work.
 - owner: Lucas
 - approver: Lucas
-- Commit:
+- Commit: `b5dee373c8d8f871d644b41aba4685581b401281`
+- TRACE: `VERDICT: GAP` for deployment only; `spec -> commit`, `commit -> code`, and `commit -> test` were backed by repo facts, with no failed checks.
 - Deployment: local repository only; no runtime deployment in this A.SPEC.
 
 ## Definition of Done
 
-- [ ] Objective satisfied
-- [ ] Scope respected
-- [ ] Contract satisfied
-- [ ] Invariants checked
-- [ ] Tests pass
-- [ ] Rollback documented
-- [ ] No prohibited paths changed
+- [x] Objective satisfied
+- [x] Scope respected
+- [x] Contract satisfied
+- [x] Invariants checked
+- [x] Tests pass
+- [x] Rollback documented
+- [x] No prohibited paths changed

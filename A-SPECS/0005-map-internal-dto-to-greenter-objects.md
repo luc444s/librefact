@@ -252,15 +252,16 @@ structural_constraints:
 - Requirement: Librefact must convert an internal Greenter emit DTO into Greenter model objects before XML generation.
 - owner: Lucas
 - approver: Lucas
-- Commit:
+- Commit: `022842ed73ace70a87c2a40aa001c9e39bca10d3`
+- TRACE: `VERDICT: GAP` for deployment only; `spec -> commit`, `commit -> code`, and `commit -> test` were backed by repo facts, with no failed checks.
 - Deployment: local repository only; no runtime deployment in this A.SPEC.
 
 ## Definition of Done
 
-- [ ] Objective satisfied
-- [ ] Scope respected
-- [ ] Contract satisfied
-- [ ] Invariants checked
-- [ ] Tests pass
-- [ ] Rollback documented
-- [ ] No prohibited paths changed
+- [x] Objective satisfied
+- [x] Scope respected
+- [x] Contract satisfied
+- [x] Invariants checked
+- [x] Tests pass
+- [x] Rollback documented
+- [x] No prohibited paths changed
