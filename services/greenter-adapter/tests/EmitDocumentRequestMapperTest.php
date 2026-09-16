@@ -30,6 +30,8 @@ final class EmitDocumentRequestMapperTest extends TestCase
 
         self::assertSame('20123456789', $request->issuer->ruc);
         self::assertSame('LIBREFACT DEMO SAC', $request->issuer->legalName);
+        self::assertNotNull($request->issuer->address);
+        self::assertSame('0000', $request->issuer->address->codLocal);
 
         self::assertSame('6', $request->customer->documentType);
         self::assertSame('20601234567', $request->customer->documentNumber);

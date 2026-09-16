@@ -79,19 +79,23 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
 
 ## Pendiente
 
-- [ ] A.SPEC 0009 — Validate SUNAT beta real pipeline
+- [x] A.SPEC 0009 — Validate SUNAT beta real pipeline
   - Spec: `A-SPECS/0009-validate-sunat-beta-real-pipeline.md`.
   - Test de integracion real gated creado con `LIBREFACT_ALLOW_REAL_SUNAT_BETA_SEND=1`.
   - Script manual de smoke test beta creado.
   - Rechaza cualquier endpoint que no sea beta.
-  - Bloqueado para envio real local por falta de `ext-soap` en PHP CLI.
+  - Envio real SUNAT beta ejecutado y aceptado: `SUCCESS: yes`, `CDR_CODE: 0`.
+  - Milestone backend validada con XML generado, XML firmado, envio beta y CDR aceptado.
+  - Requiere `cod_local`, `FormaPagoContado`, `valorVenta`, `subTotal` y direccion fiscal completa para CDR limpio.
+  - Ultima prueba limpia uso `ubigueo=130100`, `departamento=LA LIBERTAD`, `provincia=TRUJILLO`, `distrito=TRUJILLO`, `direccion=TRUJILLO`, `cod_local=0000`.
 
 - [ ] Definir operacion posterior a SUNAT beta
   - Decidir si se necesita persistencia, endpoint de consulta, manejo de errores SUNAT o trazabilidad de CDR en specs separadas.
 
-- [ ] Ejecutar envio real SUNAT beta
-  - Requiere `LIBREFACT_SUNAT_RUC`, `LIBREFACT_SUNAT_SOL_USER`, `LIBREFACT_SUNAT_SOL_PASSWORD` y certificado externo al repo.
-  - Requiere definir serie/correlativo beta unico para no chocar con envios previos.
+- [x] Ejecutar envio real SUNAT beta
+  - Ejecutado con `LIBREFACT_ALLOW_REAL_SUNAT_BETA_SEND=1` y endpoint beta.
+  - SUNAT beta acepto la factura con CDR 0.
+  - La version con direccion completa no devolvio notas CDR.
 
 ## Reglas Del Camino
 

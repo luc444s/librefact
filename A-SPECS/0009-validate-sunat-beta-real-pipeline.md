@@ -73,6 +73,7 @@ Postconditions:
   - a successful result with CDR code/description, or
   - a SUNAT/transport error with code/message.
 - The result is asserted to be technically meaningful, not silently empty.
+- Follow-up hardening in A.SPEC 0010 proves the accepted clean CDR milestone.
 
 ## INVARIANTS
 
@@ -163,13 +164,13 @@ change_surface:
 - [x] Gated real integration test added
 - [x] Manual smoke script added
 - [x] Default tests pass without network
-- [ ] Real beta test either returns accepted CDR or actionable SUNAT error
-- [ ] No secrets printed or committed
+- [x] Real beta test either returns accepted CDR or actionable SUNAT error
+- [x] No secrets printed or committed
 
-Current blocker:
+Final status:
 
 ```text
-PHP CLI is missing ext-soap, required by Greenter\Ws\Services\SoapClient.
-Observed with `LIBREFACT_ALLOW_REAL_SUNAT_BETA_SEND=1 ./vendor/bin/phpunit tests/SunatBetaRealSubmissionTest.php`:
-PHP extension ext-soap must be installed/enabled to call SUNAT beta via Greenter SoapClient.
+Real beta pipeline executed after local environment setup and adapter hardening.
+SUNAT beta returned SUCCESS: yes and CDR_CODE: 0.
+Clean CDR without address notes is covered by A.SPEC 0010.
 ```

@@ -35,11 +35,16 @@ final class EmitDocumentGreenterMapperTest extends TestCase
         self::assertInstanceOf(Company::class, $invoice->getCompany());
         self::assertSame('20123456789', $invoice->getCompany()->getRuc());
         self::assertSame('LIBREFACT DEMO SAC', $invoice->getCompany()->getRazonSocial());
+        self::assertNotNull($invoice->getCompany()->getAddress());
+        self::assertSame('0000', $invoice->getCompany()->getAddress()->getCodLocal());
 
         self::assertInstanceOf(Client::class, $invoice->getClient());
         self::assertSame('6', $invoice->getClient()->getTipoDoc());
         self::assertSame('20601234567', $invoice->getClient()->getNumDoc());
         self::assertSame('CLIENTE DEMO SAC', $invoice->getClient()->getRznSocial());
+
+        self::assertNotNull($invoice->getFormaPago());
+        self::assertSame('Contado', $invoice->getFormaPago()->getTipo());
 
         self::assertCount(1, $invoice->getDetails());
         self::assertInstanceOf(SaleDetail::class, $invoice->getDetails()[0]);
@@ -59,6 +64,8 @@ final class EmitDocumentGreenterMapperTest extends TestCase
         self::assertSame(100.0, $detail->getMtoValorVenta());
 
         self::assertSame(100.0, $invoice->getMtoOperGravadas());
+        self::assertSame(100.0, $invoice->getValorVenta());
+        self::assertSame(118.0, $invoice->getSubTotal());
         self::assertSame(18.0, $invoice->getMtoIGV());
         self::assertSame(18.0, $invoice->getTotalImpuestos());
         self::assertSame(118.0, $invoice->getMtoImpVenta());

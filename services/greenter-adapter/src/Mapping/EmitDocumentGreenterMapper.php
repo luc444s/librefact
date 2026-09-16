@@ -6,7 +6,9 @@ namespace Librefact\GreenterAdapter\Mapping;
 
 use DateTimeImmutable;
 use Greenter\Model\Client\Client;
+use Greenter\Model\Company\Address as GreenterAddress;
 use Greenter\Model\Company\Company;
+use Greenter\Model\Sale\FormaPagos\FormaPagoContado;
 use Greenter\Model\Sale\Invoice;
 use Greenter\Model\Sale\SaleDetail;
 use Librefact\GreenterAdapter\Domain\DocumentItem;
@@ -26,7 +28,10 @@ final class EmitDocumentGreenterMapper
             ->setTipoMoneda($request->document->currency)
             ->setCompany($this->toCompany($request))
             ->setClient($this->toClient($request))
+            ->setFormaPago(new FormaPagoContado())
             ->setDetails(array_map(fn (DocumentItem $item): SaleDetail => $this->toDetail($item), $request->items))
+            ->setValorVenta($request->totals->taxable)
+            ->setSubTotal($request->totals->total)
             ->setMtoOperGravadas($request->totals->taxable)
             ->setMtoIGV($request->totals->igv)
             ->setTotalImpuestos($request->totals->igv)
@@ -35,9 +40,28 @@ final class EmitDocumentGreenterMapper
 
     private function toCompany(EmitDocumentRequest $request): Company
     {
-        return (new Company())
+        $company = (new Company())
             ->setRuc($request->issuer->ruc)
             ->setRazonSocial($request->issuer->legalName);
+
+        if ($request->issuer->address !== null) {
+            $company->setAddress($this->toGreenterAddress($request->issuer->address));
+        }
+
+        return $company;
+    }
+
+    private function toGreenterAddress(\Librefact\GreenterAdapter\Domain\Address $address): GreenterAddress
+    {
+        return (new GreenterAddress())
+            ->setUbigueo($address->ubigueo)
+            ->setCodigoPais($address->codigoPais)
+            ->setDepartamento($address->departamento)
+            ->setProvincia($address->provincia)
+            ->setDistrito($address->distrito)
+            ->setUrbanizacion($address->urbanizacion)
+            ->setDireccion($address->direccion)
+            ->setCodLocal($address->codLocal);
     }
 
     private function toClient(EmitDocumentRequest $request): Client

@@ -59,6 +59,15 @@ $payload = [
     'issuer' => [
         'ruc' => $ruc,
         'legal_name' => getenv('LIBREFACT_SUNAT_ISSUER_LEGAL_NAME') ?: 'LIBREFACT BETA TEST',
+        'address' => [
+            'ubigueo' => getenv('LIBREFACT_SUNAT_ISSUER_UBIGEO') ?: null,
+            'codigo_pais' => 'PE',
+            'departamento' => getenv('LIBREFACT_SUNAT_ISSUER_DEPARTAMENTO') ?: null,
+            'provincia' => getenv('LIBREFACT_SUNAT_ISSUER_PROVINCIA') ?: null,
+            'distrito' => getenv('LIBREFACT_SUNAT_ISSUER_DISTRITO') ?: null,
+            'direccion' => getenv('LIBREFACT_SUNAT_ISSUER_DIRECCION') ?: null,
+            'cod_local' => getenv('LIBREFACT_SUNAT_ISSUER_COD_LOCAL') ?: '0000',
+        ],
     ],
     'customer' => [
         'document_type' => getenv('LIBREFACT_SUNAT_CUSTOMER_DOCUMENT_TYPE') ?: '6',

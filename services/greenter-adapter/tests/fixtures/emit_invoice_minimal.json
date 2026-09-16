@@ -13,7 +13,10 @@
   },
   "issuer": {
     "ruc": "20123456789",
-    "legal_name": "LIBREFACT DEMO SAC"
+    "legal_name": "LIBREFACT DEMO SAC",
+    "address": {
+      "cod_local": "0000"
+    }
   },
   "customer": {
     "document_type": "6",
