@@ -1,0 +1,188 @@
+import { FormEvent, useEffect, useState } from "react";
+
+import { ProductSearchDialog, type ProductSearchDialogItem } from "../../../../apps/web/src/components/ProductSearchDialog";
+import { useMutation, useQuery, useQueryClient } from "../../../../apps/web/src/lib/react-query";
+import { Alert } from "@systutor/shell/ui/alert";
+import { Button } from "@systutor/shell/ui/button";
+import { Dialog } from "@systutor/shell/ui/dialog";
+import { Input, Textarea } from "@systutor/shell/ui/input";
+import { Select } from "@systutor/shell/ui/select";
+import { toast } from "@systutor/shell/ui/toast";
+import { adjustStock, listWarehousesCatalog, stockKeys } from "../api";
+import type { LogisticsWarehouseOption, StockBalanceItem } from "../types";
+
+type ModalAjusteStockProps = {
+  open: boolean;
+  onClose: () => void;
+  onSaved?: (balance: StockBalanceItem) => void;
+  initialProduct?: ProductSearchDialogItem | null;
+  initialWarehouseId?: string | null;
+  asPage?: boolean;
+};
+
+export function ModalAjusteStock({
+  open,
+  onClose,
+  onSaved,
+  initialProduct,
+  initialWarehouseId,
+  asPage,
+}: ModalAjusteStockProps) {
+  const queryClient = useQueryClient();
+  const [showSearch, setShowSearch] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ProductSearchDialogItem | null>(
+    initialProduct ?? null,
+  );
+  const [warehouseId, setWarehouseId] = useState(initialWarehouseId ?? "");
+  const [quantity, setQuantity] = useState("");
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const warehousesQuery = useQuery({
+    queryKey: stockKeys.warehouses,
+    queryFn: listWarehousesCatalog,
+    enabled: open,
+  });
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedProduct(initialProduct ?? null);
+      setWarehouseId(initialWarehouseId ?? "");
+      setQuantity("");
+      setReason("");
+      setError(null);
+    }
+  }, [open, initialProduct, initialWarehouseId]);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedProduct(initialProduct ?? null);
+      setWarehouseId(initialWarehouseId ?? "");
+    }
+  }, [open, initialProduct, initialWarehouseId]);
+
+  const adjustMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedProduct) {
+        throw new Error("Selecciona un producto");
+      }
+      if (!warehouseId) {
+        throw new Error("Selecciona un almacén");
+      }
+      if (!quantity.trim()) {
+        throw new Error("Ingresa una cantidad");
+      }
+      const parsedQuantity = Number(quantity);
+      return adjustStock({
+        product_id: selectedProduct.id,
+        warehouse_id: warehouseId,
+        quantity: parsedQuantity,
+        unit_cost: null,
+        reason: reason.trim() || null,
+      });
+    },
+    onSuccess: async (balance) => {
+      await queryClient.invalidateQueries({ queryKey: stockKeys.all });
+      toast.success("Ajuste de stock registrado");
+      onSaved?.(balance);
+      onClose();
+    },
+  });
+
+  async function submitForm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    try {
+      await adjustMutation.mutateAsync();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No se pudo registrar el ajuste.");
+    }
+  }
+
+  const formContent = (
+    <form className="space-y-4" onSubmit={submitForm}>
+      {error ? <Alert title="No se pudo registrar el ajuste">{error}</Alert> : null}
+      {warehousesQuery.error ? (
+        <Alert title="No se pudo cargar almacenes">{warehousesQuery.error.message}</Alert>
+      ) : null}
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="block space-y-2 text-sm text-foreground">
+          <span>Producto</span>
+          <div className="space-y-2">
+            <div className="rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground">
+              {selectedProduct ? `${selectedProduct.sku} · ${selectedProduct.name}` : "Sin seleccionar"}
+            </div>
+            <Button type="button" variant="secondary" onClick={() => setShowSearch(true)}>
+              Buscar producto
+            </Button>
+          </div>
+        </label>
+        <label className="block space-y-2 text-sm text-foreground">
+          <span>Almacén</span>
+          <Select
+            value={warehouseId}
+            onChange={setWarehouseId}
+            placeholder="Selecciona un almacén"
+            options={[
+              { value: "", label: "Selecciona un almacén" },
+              ...(warehousesQuery.data ?? []).map((warehouse: LogisticsWarehouseOption) => ({
+                value: warehouse.id,
+                label: `${warehouse.code} · ${warehouse.name}`,
+              })),
+            ]}
+          />
+        </label>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="block space-y-2 text-sm text-foreground">
+          <span>Cantidad</span>
+          <Input
+            type="number"
+            step="0.001"
+            value={quantity}
+            onChange={(event) => setQuantity(event.target.value)}
+            placeholder="10 o -2"
+          />
+        </label>
+      </div>
+      <div className="grid gap-4 md:grid-cols-1">
+        <label className="block space-y-2 text-sm text-foreground">
+          <span>Motivo</span>
+          <Textarea
+            className="min-h-24"
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            placeholder="Ajuste por conteo físico"
+          />
+        </label>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="secondary" onClick={onClose}>
+          Cancelar
+        </Button>
+        <Button type="submit">Guardar ajuste</Button>
+      </div>
+      <ProductSearchDialog
+        open={showSearch}
+        onOpenChange={setShowSearch}
+        onSelect={setSelectedProduct}
+      />
+    </form>
+  );
+
+  if (asPage) {
+    return <div className="space-y-6">{formContent}</div>;
+  }
+
+  return (
+    <Dialog
+      open={open}
+      title="Ajustar stock"
+      description="Registra ajustes manuales positivos o negativos sobre el inventario."
+      onClose={onClose}
+      maxWidthClassName="max-w-4xl"
+    >
+      {formContent}
+    </Dialog>
+  );
+}

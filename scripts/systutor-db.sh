@@ -10,6 +10,8 @@ else
 fi
 
 export SYSTUTOR_DATABASE_URL="${SYSTUTOR_DATABASE_URL:-postgresql+psycopg://postgres:postgres@localhost:5432/librefact}"
+export SYSTUTOR_PLUGINS_DIR="${SYSTUTOR_PLUGINS_DIR:-$PWD/plugins}"
+export PYTHONPATH="${PYTHONPATH:+$PYTHONPATH:}$PWD"
 
 cd vendor/systutor-core
 

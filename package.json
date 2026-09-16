@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "frontend": "sh -c 'if [ ! -f apps/web/node_modules/vite/bin/vite.js ] || [ ! -f apps/web/node_modules/typescript/bin/tsc ]; then npm --prefix apps/web install --no-package-lock --no-audit --no-fund || exit 1; fi; cd apps/web && npm run dev'",
-    "services": "sh -c 'export SYSTUTOR_DATABASE_URL=\"${SYSTUTOR_DATABASE_URL:-postgresql+psycopg://postgres:postgres@localhost:5432/librefact}\"; if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi; cd vendor/systutor-core && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000'",
+    "services": "sh -c 'export SYSTUTOR_DATABASE_URL=\"${SYSTUTOR_DATABASE_URL:-postgresql+psycopg://postgres:postgres@localhost:5432/librefact}\"; export SYSTUTOR_PLUGINS_DIR=\"${SYSTUTOR_PLUGINS_DIR:-$PWD/plugins}\"; export PYTHONPATH=\"${PYTHONPATH:+$PYTHONPATH:}$PWD\"; if [ -f .venv/bin/activate ]; then . .venv/bin/activate; fi; cd vendor/systutor-core && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000'",
     "db": "bash scripts/systutor-db.sh",
+    "plugins:migrate": "bash scripts/systutor-plugins-migrate.sh",
     "dev": "npm run services & npm run frontend",
     "typecheck": "cd apps/web && npx tsc --noEmit"
   }

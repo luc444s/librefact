@@ -92,6 +92,19 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
 - [ ] Definir operacion posterior a SUNAT beta
   - Decidir si se necesita persistencia, endpoint de consulta, manejo de errores SUNAT o trazabilidad de CDR en specs separadas.
 
+- [x] A.SPEC 0011 — Import Systutor OSS Gas business plugins
+  - Crear carpeta raiz `plugins/`.
+  - Copiar desde `systutor-OSS-Gas` solo: `crm`, `productos`, `commerce`, `ventas`, `stock`.
+  - No copiar `logistics`, `tms`, `notes` ni facturacion legacy.
+  - No tocar `vendor/systutor-core/src/systutor/**`.
+  - Migrar tablas de los 5 plugins.
+  - Validar que core arranca y acepta los plugins.
+  - Validar que el registry lista los modulos importados.
+  - Validar que no se tocaron `services/greenter-adapter/**` ni secretos.
+  - Desacoplado de `commerce`, `stock`, `ventas` de `logistics` (contrato 001).
+  - Contratos 001/002 creados en `docs/contracts/`.
+  - `npm run plugins:migrate` PASS: crm=0005, productos=0009, compras=0019, ventas=0002, stock=0009.
+
 - [x] Ejecutar envio real SUNAT beta
   - Ejecutado con `LIBREFACT_ALLOW_REAL_SUNAT_BETA_SEND=1` y endpoint beta.
   - SUNAT beta acepto la factura con CDR 0.

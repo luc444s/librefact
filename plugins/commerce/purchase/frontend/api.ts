@@ -1,0 +1,373 @@
+import { apiRequest } from "@systutor/shell/api/client";
+
+function buildQuery(params: Record<string, unknown>) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === "") continue;
+    query.set(key, String(value));
+  }
+  const qs = query.toString();
+  return qs ? `?${qs}` : "";
+}
+import type {
+  ClaimDerivationResult,
+  ClosePhysicalCountPayload,
+  CommercialClosePayload,
+  CreateClaimPayload,
+  CreateInvoicePayload,
+  CreateMerchandiseReturnPayload,
+  CreateOrderPayload,
+  CreatePhysicalCountPayload,
+  CreateReceiptServiceLinePayload,
+  CreateSupplierPayload,
+  CylinderHistory,
+  MerchandiseReturn,
+  MerchandiseReturnDetail,
+  PhysicalCount,
+  PhysicalCountDetail,
+  PurchaseOrder,
+  PurchaseOrderDetail,
+  PurchaseOrderPage,
+  ReceiptServiceLine,
+  ReceiveOrderPayload,
+  Reconciliation,
+  Supplier,
+  SupplierClaim,
+  SupplierClaimDetail,
+  SupplierInvoice,
+  UpdateOrderPayload,
+  UpdateSupplierPayload,
+} from "./types";
+
+const BASE = "/api/v1/plugins/compras/purchase";
+
+// ── Suppliers ──
+
+export function listSuppliers(search?: string) {
+  return apiRequest<Supplier[]>(`${BASE}/suppliers${buildQuery({ search })}`);
+}
+
+export function createSupplier(payload: CreateSupplierPayload) {
+  return apiRequest<Supplier>(`${BASE}/suppliers`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateSupplier(id: string, payload: UpdateSupplierPayload) {
+  return apiRequest<Supplier>(`${BASE}/suppliers/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function disableSupplier(id: string) {
+  return apiRequest<Supplier>(`${BASE}/suppliers/${id}/disable`, { method: "POST" });
+}
+
+export function addSupplierAddress(supplierId: string, payload: { line1: string; label?: string | null; district?: string | null; city?: string | null; latitude?: number | null; longitude?: number | null }) {
+  return apiRequest<Supplier>(`${BASE}/suppliers/${supplierId}/addresses`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeSupplierAddress(supplierId: string, addressId: string) {
+  return apiRequest<Supplier>(`${BASE}/suppliers/${supplierId}/addresses/${addressId}`, {
+    method: "DELETE",
+  });
+}
+
+export function addSupplierContact(supplierId: string, payload: { full_name?: string | null; role?: string | null; phone?: string | null; email?: string | null }) {
+  return apiRequest<Supplier>(`${BASE}/suppliers/${supplierId}/contacts`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeSupplierContact(supplierId: string, contactId: string) {
+  return apiRequest<Supplier>(`${BASE}/suppliers/${supplierId}/contacts/${contactId}`, {
+    method: "DELETE",
+  });
+}
+
+export function addSupplierBankAccount(supplierId: string, payload: { bank_name: string; account_holder: string; iban: string; bic_swift?: string | null }) {
+  return apiRequest<Supplier>(`${BASE}/suppliers/${supplierId}/bank-accounts`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function removeSupplierBankAccount(supplierId: string, accountId: string) {
+  return apiRequest<Supplier>(`${BASE}/suppliers/${supplierId}/bank-accounts/${accountId}`, {
+    method: "DELETE",
+  });
+}
+
+export function listTanks(productId?: string) {
+  return apiRequest<Array<{ id: string; serial: string; description: string; product_id: string; content_kg: number; volume_m3: number }>>(
+    `${BASE}/tanks${productId ? `?product_id=${productId}` : ""}`
+  );
+}
+
+// ── Orders ──
+
+export function listOrders(params: Record<string, unknown> = {}) {
+  return apiRequest<PurchaseOrderPage>(`${BASE}/orders${buildQuery(params)}`);
+}
+
+export function getOrder(id: string) {
+  return apiRequest<PurchaseOrderDetail>(`${BASE}/orders/${id}`);
+}
+
+export function createOrder(payload: CreateOrderPayload) {
+  return apiRequest<PurchaseOrder>(`${BASE}/orders`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateOrder(id: string, payload: UpdateOrderPayload) {
+  return apiRequest<PurchaseOrder>(`${BASE}/orders/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function confirmOrder(id: string) {
+  return apiRequest<PurchaseOrder>(`${BASE}/orders/${id}/confirm`, { method: "POST" });
+}
+
+export function cancelOrder(id: string, reason?: string) {
+  return apiRequest<PurchaseOrder>(`${BASE}/orders/${id}/cancel`, {
+    method: "POST",
+    body: JSON.stringify(reason ? { reason } : {}),
+  });
+}
+
+export function closeOrder(id: string, reason: string) {
+  return apiRequest<PurchaseOrder>(`${BASE}/orders/${id}/close`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export function receiveOrder(id: string, payload: ReceiveOrderPayload) {
+  return apiRequest<PurchaseOrder>(`${BASE}/orders/${id}/receive`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function commercialCloseReceipt(receiptId: string, payload: CommercialClosePayload) {
+  return apiRequest<PurchaseOrder>(`${BASE}/receipts/${receiptId}/commercial-close`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createInvoice(orderId: string, payload: CreateInvoicePayload) {
+  return apiRequest<SupplierInvoice>(`${BASE}/orders/${orderId}/invoices`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listInvoices(orderId: string) {
+  return apiRequest<SupplierInvoice[]>(`${BASE}/orders/${orderId}/invoices`);
+}
+
+export function getReconciliation(orderId: string) {
+  return apiRequest<Reconciliation>(`${BASE}/orders/${orderId}/reconciliation`);
+}
+
+export function cancelInvoice(invoiceId: string) {
+  return apiRequest<SupplierInvoice>(`${BASE}/invoices/${invoiceId}/cancel`, {
+    method: "POST",
+  });
+}
+
+// ── Claims (reclamaciones al proveedor) ──
+
+export function listClaims(orderId: string) {
+  return apiRequest<SupplierClaim[]>(`${BASE}/orders/${orderId}/claims`);
+}
+
+export function getClaim(orderId: string, claimId: string) {
+  return apiRequest<SupplierClaimDetail>(`${BASE}/orders/${orderId}/claims/${claimId}`);
+}
+
+export function createClaim(orderId: string, payload: CreateClaimPayload) {
+  return apiRequest<SupplierClaim>(`${BASE}/orders/${orderId}/claims`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function startClaim(orderId: string, claimId: string) {
+  return apiRequest<SupplierClaim>(`${BASE}/orders/${orderId}/claims/${claimId}/start`, {
+    method: "POST",
+  });
+}
+
+export function resolveClaim(orderId: string, claimId: string, resolutionNotes: string) {
+  return apiRequest<SupplierClaim>(`${BASE}/orders/${orderId}/claims/${claimId}/resolve`, {
+    method: "POST",
+    body: JSON.stringify({ resolution_notes: resolutionNotes }),
+  });
+}
+
+export function annulClaim(orderId: string, claimId: string, reason: string) {
+  return apiRequest<SupplierClaim>(`${BASE}/orders/${orderId}/claims/${claimId}/annul`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export function deriveClaims(orderId: string) {
+  return apiRequest<ClaimDerivationResult>(`${BASE}/orders/${orderId}/claims/derive`, {
+    method: "POST",
+  });
+}
+
+// ── Merchandise returns (devolución al proveedor) ──
+
+export function listMerchandiseReturns(orderId: string) {
+  return apiRequest<MerchandiseReturn[]>(`${BASE}/orders/${orderId}/returns`);
+}
+
+export function getMerchandiseReturn(orderId: string, returnId: string) {
+  return apiRequest<MerchandiseReturnDetail>(`${BASE}/orders/${orderId}/returns/${returnId}`);
+}
+
+export function createMerchandiseReturn(orderId: string, payload: CreateMerchandiseReturnPayload) {
+  return apiRequest<MerchandiseReturn>(`${BASE}/orders/${orderId}/returns`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function completeMerchandiseReturn(orderId: string, returnId: string, resolutionNotes: string) {
+  return apiRequest<MerchandiseReturn>(`${BASE}/orders/${orderId}/returns/${returnId}/complete`, {
+    method: "POST",
+    body: JSON.stringify({ resolution_notes: resolutionNotes }),
+  });
+}
+
+export function annulMerchandiseReturn(orderId: string, returnId: string, reason: string) {
+  return apiRequest<MerchandiseReturn>(`${BASE}/orders/${orderId}/returns/${returnId}/annul`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+}
+
+// ── Receipt service lines (servicios del proveedor por serial) ──
+
+export function listReceiptServiceLines(receiptId: string) {
+  return apiRequest<ReceiptServiceLine[]>(`${BASE}/receipts/${receiptId}/service-lines`);
+}
+
+export function createReceiptServiceLine(receiptId: string, payload: CreateReceiptServiceLinePayload) {
+  return apiRequest<ReceiptServiceLine>(`${BASE}/receipts/${receiptId}/service-lines`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteReceiptServiceLine(receiptId: string, lineId: string) {
+  return apiRequest<void>(`${BASE}/receipts/${receiptId}/service-lines/${lineId}`, {
+    method: "DELETE",
+  });
+}
+
+// ── Cylinder history (historial técnico del envase por serial) ──
+
+export function getCylinderHistory(serial: string) {
+  return apiRequest<CylinderHistory>(
+    `${BASE}/cylinders/${encodeURIComponent(serial)}/history`
+  );
+}
+
+// ── Physical counts (conteo físico de custodia serial-by-serial) ──
+
+export function listPhysicalCounts(params: Record<string, unknown> = {}) {
+  return apiRequest<PhysicalCount[]>(
+    `${BASE}/dispatches/physical-counts${buildQuery(params)}`
+  );
+}
+
+export function getPhysicalCount(id: string) {
+  return apiRequest<PhysicalCountDetail>(`${BASE}/dispatches/physical-counts/${id}`);
+}
+
+export function createPhysicalCount(payload: CreatePhysicalCountPayload) {
+  return apiRequest<PhysicalCount>(`${BASE}/dispatches/physical-counts`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function closePhysicalCount(id: string, payload: ClosePhysicalCountPayload) {
+  return apiRequest<PhysicalCount>(`${BASE}/dispatches/physical-counts/${id}/close`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function resolvePhysicalCountItem(
+  id: string,
+  itemId: string,
+  resolution: string,
+  reason: string
+) {
+  return apiRequest<PhysicalCountDetail>(
+    `${BASE}/dispatches/physical-counts/${id}/items/${itemId}/resolve`,
+    {
+      method: "POST",
+      body: JSON.stringify({ resolution, reason }),
+    }
+  );
+}
+
+// ── Dispatches ──
+
+export function listDispatches(params: Record<string, unknown> = {}) {
+  const normalizedParams: Record<string, unknown> = { ...params };
+  if (normalizedParams["status"] !== undefined && normalizedParams["status_filter"] === undefined) {
+    normalizedParams["status_filter"] = normalizedParams["status"];
+    delete normalizedParams["status"];
+  }
+  return apiRequest<import("./types").DispatchPage>(`${BASE}/dispatches${buildQuery(normalizedParams)}`);
+}
+
+export function getDispatch(id: string) {
+  return apiRequest<import("./types").Dispatch>(`${BASE}/dispatches/${id}`);
+}
+
+export function createDispatch(payload: Record<string, unknown>) {
+  return apiRequest<import("./types").Dispatch>(`${BASE}/dispatches`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function confirmDispatch(id: string) {
+  return apiRequest<import("./types").Dispatch>(`${BASE}/dispatches/${id}/confirm`, { method: "POST" });
+}
+
+export function cancelDispatch(id: string) {
+  return apiRequest<import("./types").Dispatch>(`${BASE}/dispatches/${id}/cancel`, { method: "POST" });
+}
+
+export function listSupplierCustody(supplierId: string, params: Record<string, unknown> = {}) {
+  return apiRequest<import("./types").CustodyEntry[]>(
+    `${BASE}/dispatches/suppliers/${supplierId}/custody${buildQuery(params)}`
+  );
+}
+
+export function registerDispatchReturn(id: string, cylinderIds: string[], notes?: string) {
+  return apiRequest<import("./types").Dispatch>(`${BASE}/dispatches/${id}/return`, {
+    method: "POST",
+    body: JSON.stringify({ cylinders: cylinderIds.map(c => ({ cylinder_id: c })), notes: notes ?? null }),
+  });
+}
