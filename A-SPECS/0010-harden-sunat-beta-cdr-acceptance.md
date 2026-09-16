@@ -232,7 +232,7 @@ structural_constraints:
 - Requirement: Complete the backend SUNAT beta test milestone with an accepted clean CDR.
 - owner: Lucas
 - approver: Lucas
-- Commit: pending
+- Commit: 18307c615a4b1d77e9eed62be3b69e74c455b0ad
 - Deployment: local SUNAT beta smoke only
 
 ## Definition of Done
@@ -247,4 +247,4 @@ structural_constraints:
 - [x] Composition checks passed when applicable
 - [x] No unrelated changes
 - [x] Structural constraints respected
-- [ ] Traceability established
+- [x] Traceability established
