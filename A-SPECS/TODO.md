@@ -104,6 +104,9 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - Desacoplado de `commerce`, `stock`, `ventas` de `logistics` (contrato 001).
   - Contratos 001/002 creados en `docs/contracts/`.
   - `npm run plugins:migrate` PASS: crm=0005, productos=0009, compras=0019, ventas=0002, stock=0009.
+  - Commit de implementacion: `7edfdad02abd540bfece31e9cede6ff086d07606`.
+  - Commit soporte `apps/web`: `78ed698`.
+  - TRACE: `GAP` aceptado por migraciones legacy de `productos` sin downgrade/down y deployment no exponible.
 
 - [x] Ejecutar envio real SUNAT beta
   - Ejecutado con `LIBREFACT_ALLOW_REAL_SUNAT_BETA_SEND=1` y endpoint beta.

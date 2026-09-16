@@ -22,6 +22,17 @@ Import selected mature Systutor OSS Gas business plugins into Librefact as root 
 - `npm run plugins:migrate`
 - `npm run typecheck`
 
+Observed implementation verification:
+
+```text
+Commit: 7edfdad02abd540bfece31e9cede6ff086d07606
+apps/web support commit: 78ed698
+npm run plugins:migrate: PASS — crm=0005, productos=0009, compras=0019, ventas=0002, stock=0009
+npm run typecheck: PASS
+npx vite build: PASS
+TRACE: GAP accepted — productos migrations 002, 003, 006, 007, 008, 009 lack downgrade/down; deployment not exposable.
+```
+
 ## Change Surface
 
 ```yaml
