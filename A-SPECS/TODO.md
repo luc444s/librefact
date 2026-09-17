@@ -148,6 +148,26 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - `npm run plugins:migrate` PASS: compras=0022.
   - `npm run typecheck` PASS.
 
+- [x] A.SPEC 0019 — Hide purchase order UUID in report
+  - Spec: `A-SPECS/0019-hide-purchase-order-uuid-in-report.md`.
+  - Purchase report no longer shows raw order UUID column.
+  - Rows show persisted `correlative_full_number` or an 8-digit visual fallback.
+  - Local demo orders were backfilled to `OC-00000001` through `OC-00000003`.
+  - `cfg_document_series.next_number` for `ORDEN_COMPRA`/`OC` was advanced to `4`.
+  - `npm run typecheck` PASS.
+
+- [x] A.SPEC 0020 — Sales dispatch decrements stock
+  - Spec: `A-SPECS/0020-sales-dispatch-decrements-stock.md`.
+  - Ventas dispatch now calls stock `sale_out_stock` per pending order item.
+  - Dispatch uses current branch/warehouse context and idempotency per order item.
+  - Existing FIDEOS sale was backfilled: stock moved from `52.000` to `49.000` and `dispatched_qty` became `3.00`.
+  - `py_compile` for changed ventas backend files PASS.
+
+- [x] A.SPEC 0021 — Localize stock ledger operations
+  - Spec: `A-SPECS/0021-localize-stock-ledger-operations.md`.
+  - Stock ledger operation column now shows Spanish labels instead of raw codes.
+  - `npm run typecheck` PASS.
+
 ## Reglas Del Camino
 
 - Cada A.SPEC debe ser test-first.
