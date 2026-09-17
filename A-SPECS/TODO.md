@@ -108,6 +108,32 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - Commit soporte `apps/web`: `78ed698`.
   - TRACE: `GAP` aceptado por migraciones legacy de `productos` sin downgrade/down y deployment no exponible.
 
+- [x] A.SPEC 0012 — Remove industrial-gas coupling from imported plugins
+  - Eliminado ADR completo y todo el dominio de cilindros/gases de `productos`, `compras`, `ventas`, `crm` y `stock`.
+  - Eliminados los imports rotos a `plugins.logistics` (bloqueaban la carga de `compras` y `ventas`).
+  - Migraciones forward-only: `productos` 0010 (drop `prod_adr` + `gas_product_id`), `compras` 0020 (drop tablas de cilindros + `dispatch_id`); 006–009/003/014/017 conservadas y guardadas.
+  - `npm run db`, `npm run plugins:migrate` (productos=0010, compras=0020), `npm run typecheck`, `npx vite build`: PASS.
+  - Gaps preexistentes detectados (fuera de scope): `crm/migrations/005` y `stock/migrations/006` dependen de tablas `lg_*`; rompen BD fresca sin migraciones de logistics.
+  - Spec: `A-SPECS/0012-remove-industrial-gas-coupling.md`.
+
+- [x] A.SPEC 0013 — Use branches as stock warehouses
+  - Spec: `A-SPECS/0013-use-branches-as-stock-warehouses.md`.
+  - Decision: `warehouse_id` remains the public/API field name, but values refer
+    to `branches.id`.
+  - Runtime goal: stock must use core branches instead of removed logistics
+    warehouse models.
+  - Schema goal: stock `warehouse_id` FKs point to `branches(id)`.
+  - Implemented in `systutor-stock` commit `fb0ec23`.
+  - `npm run plugins:migrate` PASS: stock=0010.
+
+- [x] A.SPEC 0017 — Use document series in sales
+  - Spec: `A-SPECS/0017-use-document-series-in-sales.md`.
+  - Migration 0007 adds document_series_id, document_series, document_number, document_full_number to ventas_orders.
+  - confirm_order looks up default active series from cfg_document_series and atomically increments next_number.
+  - Frontend shows document_full_number in order table, report orders table, and order actions dialog.
+  - `npm run plugins:migrate` PASS: ventas=0007.
+  - `npm run typecheck` PASS.
+
 - [x] Ejecutar envio real SUNAT beta
   - Ejecutado con `LIBREFACT_ALLOW_REAL_SUNAT_BETA_SEND=1` y endpoint beta.
   - SUNAT beta acepto la factura con CDR 0.
