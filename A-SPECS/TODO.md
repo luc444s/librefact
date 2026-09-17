@@ -139,6 +139,15 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - SUNAT beta acepto la factura con CDR 0.
   - La version con direccion completa no devolvio notas CDR.
 
+- [x] A.SPEC 0018 — Use purchase order correlative
+  - Spec: `A-SPECS/0018-use-purchase-order-correlative.md`.
+  - Migration 0022 adds correlative_series_id, correlative_series, correlative_number, correlative_full_number to com_purchase_orders.
+  - Migration seeds default ORDEN_COMPRA series (OC, initial_number=1) for demo tenant.
+  - confirm_order looks up default active series from cfg_document_series and atomically increments next_number.
+  - Frontend shows correlative_full_number in order table and report orders table.
+  - `npm run plugins:migrate` PASS: compras=0022.
+  - `npm run typecheck` PASS.
+
 ## Reglas Del Camino
 
 - Cada A.SPEC debe ser test-first.
