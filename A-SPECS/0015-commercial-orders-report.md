@@ -207,6 +207,9 @@ structural_constraints:
   `5c8b058ff0d5d6a1246bbfc7d803270425a9d677` (`systutor-ventas`)
 - TRACE: PASS — surface respected, commerce/ventas gitlinks accepted, no
   migrations in scope, deployment applied locally.
+- Follow-up commits: `578392e52aa704db18da5bd2cec62c21c61fe890`
+  (`systutor-compras`) and `ec42cd7580b8e438679d5a5d84802863a3d2e3bf`
+  (`systutor-ventas`) show cancelled orders as non-counting report history.
 - Deployment: local Librefact dev runtime after implementation
 
 ## Definition of Done
