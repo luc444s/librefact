@@ -1,0 +1,15 @@
+{
+  "id": "configuracion",
+  "name": "Configuración",
+  "version": "0.1.0",
+  "api_version": "1",
+  "requires": [],
+  "backend_entrypoint": "backend.plugin:register",
+  "frontend_entrypoint": "frontend/register.tsx",
+  "permissions": [
+    "configuracion.document_series.read",
+    "configuracion.document_series.manage"
+  ],
+  "events": [],
+  "description": "Configuración fiscal de series y correlativos"
+}
