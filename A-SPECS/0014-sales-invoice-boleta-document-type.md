@@ -196,8 +196,10 @@ structural_constraints:
   RUC customer and boleta with optional customer/document chosen in the form.
 - owner: agent
 - approver: lucas
-- Commit: `c152dd6c7c3d7977f99a3f322645fe1266a797c1` (`systutor-ventas`),
-  Librefact gitlink commit pending
+- Commit: `8cbbe3cbf6c4c8e0c62bde60d11fa5a7ceedaa7f` (Librefact),
+  `c152dd6c7c3d7977f99a3f322645fe1266a797c1` (`systutor-ventas`)
+- TRACE: PASS — surface respected, ventas gitlink accepted, migration downgrade
+  present, deployment applied locally.
 - Deployment: local Librefact dev DB after plugin migration
 
 ## Definition of Done
@@ -212,4 +214,4 @@ structural_constraints:
 - [x] Composition checks passed when applicable
 - [x] No unrelated changes
 - [x] Structural constraints respected
-- [ ] Traceability established
+- [x] Traceability established
