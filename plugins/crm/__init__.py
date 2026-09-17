@@ -1,1 +1,0 @@
-"""CRM plugin package."""
