@@ -104,7 +104,8 @@ change_surface:
 - Requirement: User reported that a FIDEOS sale did not alter stock.
 - owner: agent
 - approver: lucas
-- Commit: Pending.
+- Commit: `2022afe163db2b50694cb4f91a9fc1d532826257` (`systutor-ventas`),
+  `281f704092dd1765832662198cb263f18f409381` (Librefact gitlink/spec).
 
 ## Definition of Done
 

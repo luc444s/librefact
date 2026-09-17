@@ -115,7 +115,8 @@ change_surface:
   correlativos for the three existing purchase orders.
 - owner: agent
 - approver: lucas
-- Commit: Pending.
+- Commit: `fa37416d419b024e65257ac682e04e695691f0db` (`systutor-compras`),
+  `281f704092dd1765832662198cb263f18f409381` (Librefact gitlink/spec).
 
 ## Definition of Done
 

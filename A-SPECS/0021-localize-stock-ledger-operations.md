@@ -76,7 +76,8 @@ change_surface:
 - Requirement: User asked to show ledger operation labels in Spanish.
 - owner: agent
 - approver: lucas
-- Commit: Pending.
+- Commit: `ddeb5e5a0959af184727ba4ae99bb0529493d49a` (`systutor-stock`),
+  `281f704092dd1765832662198cb263f18f409381` (Librefact gitlink/spec).
 
 ## Definition of Done
 
