@@ -122,6 +122,8 @@ change_surface:
     - plugins/commerce/purchase/backend/services/*.py
     - plugins/commerce/purchase/backend/router.py
     - plugins/commerce/purchase/frontend/api.ts
+    - plugins/commerce/purchase/frontend/pages/PurchaseOrdersPage.tsx
+    - plugins/commerce/purchase/frontend/pages/purchase/*.tsx
     - plugins/ventas/backend/routers/*.py
     - plugins/ventas/backend/schemas/*.py
     - plugins/ventas/backend/services/*.py
@@ -200,9 +202,11 @@ structural_constraints:
   or sales in selectable day/month/hour ranges using `created_at`.
 - owner: agent
 - approver: lucas
-- Commit: pending Librefact trace;
+- Commit: `69af6478b7eaf4092ecea2ddd5303aae8c5c2e8b` (Librefact),
   `a0167d38a4c389d87dcb7714dc0c37c0ee95cc92` (`systutor-compras`),
   `5c8b058ff0d5d6a1246bbfc7d803270425a9d677` (`systutor-ventas`)
+- TRACE: PASS — surface respected, commerce/ventas gitlinks accepted, no
+  migrations in scope, deployment applied locally.
 - Deployment: local Librefact dev runtime after implementation
 
 ## Definition of Done
@@ -217,4 +221,4 @@ structural_constraints:
 - [x] Composition checks passed when applicable
 - [x] No unrelated changes
 - [x] Structural constraints respected
-- [ ] Traceability established
+- [x] Traceability established
