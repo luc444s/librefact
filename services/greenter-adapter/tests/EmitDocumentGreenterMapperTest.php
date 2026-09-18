@@ -71,6 +71,25 @@ final class EmitDocumentGreenterMapperTest extends TestCase
         self::assertSame(118.0, $invoice->getMtoImpVenta());
     }
 
+    public function testBoletaRequestMapsToGreenterInvoiceType03(): void
+    {
+        $payload = $this->validPayload();
+        $payload['document']['type'] = 'boleta';
+        $payload['document']['serie'] = 'B001';
+        $payload['customer']['document_type'] = '1';
+        $payload['customer']['document_number'] = '20203030';
+        $payload['customer']['legal_name'] = 'PERSON 1';
+
+        $request = (new EmitDocumentRequestMapper())->fromPayload($payload);
+        $invoice = (new EmitDocumentGreenterMapper())->toInvoice($request);
+
+        self::assertInstanceOf(Invoice::class, $invoice);
+        self::assertSame('03', $invoice->getTipoDoc());
+        self::assertSame('B001', $invoice->getSerie());
+        self::assertSame('1', $invoice->getClient()->getTipoDoc());
+        self::assertSame('20203030', $invoice->getClient()->getNumDoc());
+    }
+
     /**
      * @return array<string, mixed>
      */

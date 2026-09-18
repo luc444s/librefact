@@ -21,7 +21,7 @@ final class EmitDocumentGreenterMapper
         return (new Invoice())
             ->setUblVersion('2.1')
             ->setTipoOperacion('0101')
-            ->setTipoDoc('01')
+            ->setTipoDoc($this->sunatDocumentType($request))
             ->setSerie($request->document->serie)
             ->setCorrelativo((string) $request->document->number)
             ->setFechaEmision(new DateTimeImmutable($request->document->issueDate))
@@ -36,6 +36,11 @@ final class EmitDocumentGreenterMapper
             ->setMtoIGV($request->totals->igv)
             ->setTotalImpuestos($request->totals->igv)
             ->setMtoImpVenta($request->totals->total);
+    }
+
+    private function sunatDocumentType(EmitDocumentRequest $request): string
+    {
+        return $request->document->type === 'boleta' ? '03' : '01';
     }
 
     private function toCompany(EmitDocumentRequest $request): Company

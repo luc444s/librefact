@@ -168,6 +168,15 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - Stock ledger operation column now shows Spanish labels instead of raw codes.
   - `npm run typecheck` PASS.
 
+- [x] A.SPEC 0022 — Greenter boleta beta send
+  - Spec: `A-SPECS/0022-greenter-boleta-beta-send.md`.
+  - ERP core frozen; change is limited to `services/greenter-adapter`.
+  - Adapter accepts `document.type = boleta`, validates `B###` series and DNI customer.
+  - Mapper emits Greenter `Invoice` with `tipoDoc = 03` for boletas.
+  - XML test verifies `InvoiceTypeCode 03`.
+  - SUNAT beta accepted boleta `B001-75854` with `CDR_CODE: 0`.
+  - `composer test` PASS.
+
 ## Reglas Del Camino
 
 - Cada A.SPEC debe ser test-first.

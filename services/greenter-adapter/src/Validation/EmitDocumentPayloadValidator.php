@@ -24,9 +24,13 @@ final class EmitDocumentPayloadValidator
         }
 
         $document = $this->section($payload, 'document', $errors);
+        $documentType = null;
         if ($document !== null) {
-            $this->requiredEquals($document, 'document.type', 'invoice', $errors);
+            $documentType = $this->documentType($document, $errors);
             $this->requiredNonEmpty($document, 'document.serie', $errors);
+            if ($documentType !== null && isset($document['serie']) && is_string($document['serie'])) {
+                $this->validateSerie($documentType, $document['serie'], $errors);
+            }
             $this->requiredNumber($document, 'document.number', 0.0, false, $errors);
             $this->requiredEquals($document, 'document.currency', 'PEN', $errors);
             $this->requiredDate($document, 'document.issue_date', $errors);
@@ -40,8 +44,13 @@ final class EmitDocumentPayloadValidator
 
         $customer = $this->section($payload, 'customer', $errors);
         if ($customer !== null) {
-            $this->requiredEquals($customer, 'customer.document_type', '6', $errors);
-            $this->requiredDigits($customer, 'customer.document_number', 11, $errors);
+            if ($documentType === 'boleta') {
+                $this->requiredEquals($customer, 'customer.document_type', '1', $errors);
+                $this->requiredDigits($customer, 'customer.document_number', 8, $errors);
+            } else {
+                $this->requiredEquals($customer, 'customer.document_type', '6', $errors);
+                $this->requiredDigits($customer, 'customer.document_number', 11, $errors);
+            }
             $this->requiredNonEmpty($customer, 'customer.legal_name', $errors);
         }
 
@@ -88,6 +97,38 @@ final class EmitDocumentPayloadValidator
 
         if ($section[$key] !== $expected) {
             $this->addError($errors, $field, $field . ' must equal ' . $expected);
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $document
+     * @param array<int, array{field:string, message:string}> $errors
+     */
+    private function documentType(array $document, array &$errors): ?string
+    {
+        if (!array_key_exists('type', $document)) {
+            $this->addError($errors, 'document.type', 'document.type is required');
+
+            return null;
+        }
+
+        if (!in_array($document['type'], ['invoice', 'boleta'], true)) {
+            $this->addError($errors, 'document.type', 'document.type must equal invoice or boleta');
+
+            return null;
+        }
+
+        return $document['type'];
+    }
+
+    /**
+     * @param array<int, array{field:string, message:string}> $errors
+     */
+    private function validateSerie(string $documentType, string $serie, array &$errors): void
+    {
+        $pattern = $documentType === 'boleta' ? '/^B\d{3}$/' : '/^F\d{3}$/';
+        if (preg_match($pattern, $serie) !== 1) {
+            $this->addError($errors, 'document.serie', 'document.serie has invalid format for ' . $documentType);
         }
     }
 

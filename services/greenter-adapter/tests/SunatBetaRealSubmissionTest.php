@@ -71,6 +71,67 @@ final class SunatBetaRealSubmissionTest extends TestCase
         self::assertNotSame('', (string) ($result->errorCode() ?? $result->errorMessage()));
     }
 
+    public function testRealSunatBetaBoletaSubmissionReturnsMeaningfulCdrOrError(): void
+    {
+        EnvFileLoader::load(dirname(__DIR__, 3) . '/.env');
+
+        if (getenv('LIBREFACT_ALLOW_REAL_SUNAT_BETA_SEND') !== '1') {
+            self::markTestSkipped('Real SUNAT beta send is disabled. Set LIBREFACT_ALLOW_REAL_SUNAT_BETA_SEND=1 to run it.');
+        }
+        if (!getenv('LIBREFACT_SUNAT_BOLETA_CORRELATIVE')) {
+            self::markTestSkipped('Set LIBREFACT_SUNAT_BOLETA_CORRELATIVE to run the real boleta beta send.');
+        }
+
+        $this->assertBetaEnvironment();
+        self::assertTrue(extension_loaded('soap'), 'PHP extension ext-soap must be installed/enabled to call SUNAT beta via Greenter SoapClient.');
+
+        $ruc = $this->requiredEnv('LIBREFACT_SUNAT_RUC');
+        $serie = getenv('LIBREFACT_SUNAT_BOLETA_SERIE') ?: 'B001';
+        $correlative = (int) $this->requiredEnv('LIBREFACT_SUNAT_BOLETA_CORRELATIVE');
+        $pem = file_get_contents($this->requiredEnv('LIBREFACT_SUNAT_CERTIFICATE_PEM_PATH'));
+        self::assertIsString($pem);
+        self::assertNotSame('', $pem);
+
+        $payload = $this->payload($ruc, $serie, $correlative);
+        $payload['document']['type'] = 'boleta';
+        $payload['customer']['document_type'] = getenv('LIBREFACT_SUNAT_BOLETA_CUSTOMER_DOCUMENT_TYPE') ?: '1';
+        $payload['customer']['document_number'] = getenv('LIBREFACT_SUNAT_BOLETA_CUSTOMER_DOCUMENT_NUMBER') ?: '20203030';
+        $payload['customer']['legal_name'] = getenv('LIBREFACT_SUNAT_BOLETA_CUSTOMER_LEGAL_NAME') ?: 'PERSON 1';
+
+        $request = (new EmitDocumentRequestMapper())->fromPayload($payload);
+        $unsignedXml = (new EmitDocumentXmlGenerator())->generate($request);
+        $signedXml = (new EmitDocumentXmlSigner())->sign($unsignedXml, $pem);
+
+        self::assertStringContainsString('<cbc:InvoiceTypeCode listID="0101">03</cbc:InvoiceTypeCode>', $signedXml);
+        self::assertStringContainsString('<ds:Signature', $signedXml);
+        self::assertTrue((new SignedXml())->verifyXml($signedXml));
+
+        $filename = sprintf('%s-03-%s-%d', $ruc, $serie, $correlative);
+        $result = (new SunatInvoiceSender())->sendSignedInvoice(
+            $filename,
+            $signedXml,
+            new SunatSubmissionCredentials(
+                $ruc,
+                $this->requiredEnv('LIBREFACT_SUNAT_SOL_USER'),
+                $this->requiredEnv('LIBREFACT_SUNAT_SOL_PASSWORD'),
+                $this->requiredEnv('LIBREFACT_SUNAT_ENDPOINT') ?: SunatEndpoints::FE_BETA
+            )
+        );
+
+        self::assertTrue(
+            $result->success() || $result->errorCode() !== null || $result->errorMessage() !== null,
+            'SUNAT beta boleta response must be either accepted CDR or actionable SUNAT/transport error.'
+        );
+
+        if ($result->success()) {
+            self::assertNotNull($result->cdrCode());
+            self::assertNotNull($result->cdrDescription());
+            return;
+        }
+
+        self::assertNotSame('', (string) ($result->errorCode() ?? $result->errorMessage()));
+    }
+
     private function assertBetaEnvironment(): void
     {
         self::assertSame('beta', $this->requiredEnv('LIBREFACT_SUNAT_ENV'));

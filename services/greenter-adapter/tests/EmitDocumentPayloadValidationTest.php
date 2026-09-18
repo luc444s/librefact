@@ -20,6 +20,22 @@ final class EmitDocumentPayloadValidationTest extends TestCase
         self::assertSame([], $response['body']['errors']);
     }
 
+    public function testMinimalBoletaPayloadIsAccepted(): void
+    {
+        $payload = $this->validPayload();
+        $payload['document']['type'] = 'boleta';
+        $payload['document']['serie'] = 'B001';
+        $payload['customer']['document_type'] = '1';
+        $payload['customer']['document_number'] = '20203030';
+        $payload['customer']['legal_name'] = 'PERSON 1';
+
+        $response = (new EmitDocumentEndpoint())->handle('POST', '/documents/emit', $payload);
+
+        self::assertSame(202, $response['status_code']);
+        self::assertSame('received', $response['body']['status']);
+        self::assertSame([], $response['body']['errors']);
+    }
+
     /**
      * @dataProvider invalidPayloadProvider
      *
@@ -64,7 +80,7 @@ final class EmitDocumentPayloadValidationTest extends TestCase
         }, 'document.type'];
 
         yield 'unsupported document.type' => [function (array $payload): array {
-            $payload['document']['type'] = 'boleta';
+            $payload['document']['type'] = 'receipt';
 
             return $payload;
         }, 'document.type'];

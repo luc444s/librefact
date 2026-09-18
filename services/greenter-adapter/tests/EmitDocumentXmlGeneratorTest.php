@@ -49,6 +49,25 @@ final class EmitDocumentXmlGeneratorTest extends TestCase
         self::assertSame('urn:oasis:names:specification:ubl:schema:xsd:Invoice-2', $dom->documentElement->namespaceURI);
     }
 
+    public function testBoletaRequestGeneratesInvoiceXmlWithType03(): void
+    {
+        $payload = $this->validPayload();
+        $payload['document']['type'] = 'boleta';
+        $payload['document']['serie'] = 'B001';
+        $payload['customer']['document_type'] = '1';
+        $payload['customer']['document_number'] = '20203030';
+        $payload['customer']['legal_name'] = 'PERSON 1';
+
+        $request = (new EmitDocumentRequestMapper())->fromPayload($payload);
+        $xml = (new EmitDocumentXmlGenerator())->generate($request);
+
+        self::assertStringContainsString('<Invoice', $xml);
+        self::assertStringContainsString('<cbc:ID>B001-1</cbc:ID>', $xml);
+        self::assertStringContainsString('<cbc:InvoiceTypeCode listID="0101">03</cbc:InvoiceTypeCode>', $xml);
+        self::assertStringContainsString('20203030', $xml);
+        self::assertStringContainsString('PERSON 1', $xml);
+    }
+
     /**
      * @return array<string, mixed>
      */
