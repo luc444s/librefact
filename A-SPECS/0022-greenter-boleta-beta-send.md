@@ -148,7 +148,7 @@ change_surface:
   SUNAT send in Greenter adapter based on the existing factura send.
 - owner: agent
 - approver: lucas
-- Commit: Pending.
+- Commit: `f151cd3bda4194c5780e9171696d8ccebfd440dd`.
 
 ## Definition of Done
 
