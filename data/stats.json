@@ -1,0 +1,26 @@
+{
+  "distribucion_category_normalized": {
+    "Abarrotes": 94,
+    "Bebidas": 104,
+    "Conservas": 49,
+    "Desayuno": 127,
+    "Galletas": 155,
+    "Golosinas": 253,
+    "Higiene": 3,
+    "Limpieza": 1,
+    "Lácteos": 289,
+    "Panificados": 81,
+    "Salsas y condimentos": 60,
+    "Snacks": 43
+  },
+  "duplicados": 0,
+  "method": "official Open Food Facts CSV gzip export streamed row by row",
+  "numero_marcas": 545,
+  "productos_con_imagen": 976,
+  "productos_descartados": 1377,
+  "productos_encontrados_para_peru": 2636,
+  "productos_sin_imagen": 283,
+  "productos_validos": 1259,
+  "registros_examinados": 4532767,
+  "source_url": "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz"
+}
