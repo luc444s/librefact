@@ -1,0 +1,34 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.g4pg'
+    compileSdk 34
+    buildToolsVersion '34.0.0'
+
+    defaultConfig {
+        applicationId 'com.g4pg'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1'
+    }
+
+    packaging {
+        jniLibs { useLegacyPackaging = true }
+    }
+
+    buildTypes {
+        debug { debuggable true }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    aaptOptions {
+        noCompress 'zip'
+    }
+}

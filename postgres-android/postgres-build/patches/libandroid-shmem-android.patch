@@ -1,0 +1,93 @@
+--- a/shmem.c	2026-09-19 23:52:57.410058159 -0500
++++ b/shmem.c	2026-09-19 23:52:58.031736567 -0500
+@@ -14,6 +14,8 @@
+ #include <sys/un.h>
+ #include <unistd.h>
+ #include <paths.h>
++#include <sys/stat.h>
++#include <sys/syscall.h>
+ 
+ #if __ANDROID_API__ < 26
+ #define __u32 uint32_t
+@@ -113,11 +115,14 @@
+ 
+ static int ashmem_get_size_region(int fd)
+ {
+-#if __ANDROID_API__ >= 26
+-	return ASharedMemory_getSize(fd);
+-#else
+-	return TEMP_FAILURE_RETRY(ioctl(fd, ASHMEM_GET_SIZE, NULL));
+-#endif
++	/* Android portability: the Termux prebuilt relies on the legacy
++	 * /dev/ashmem (removed in Android 11+) or ASharedMemory, which pulls
++	 * libandroid.so. Back the region with a memfd instead: plain fd, only
++	 * libc needed, and its size is whatever ftruncate() set. */
++	struct stat st;
++	if (fstat(fd, &st) != 0)
++		return -1;
++	return (int) st.st_size;
+ }
+ 
+ /*
+@@ -129,28 +134,22 @@
+  */
+ static int ashmem_create_region(char const* name, size_t size)
+ {
+-#if __ANDROID_API__ >= 26
+-	return ASharedMemory_create(name, size);
+-#else
+-	// From https://android.googlesource.com/platform/system/core/+/master/libcutils/ashmem-dev.c
+-	int fd = open("/dev/ashmem", O_RDWR);
+-	if (fd < 0) return fd;
+-
+-	char name_buffer[ASHMEM_NAME_LEN] = {0};
+-	strncpy(name_buffer, name, sizeof(name_buffer));
+-	name_buffer[sizeof(name_buffer)-1] = 0;
+-
+-	int ret = ioctl(fd, ASHMEM_SET_NAME, name_buffer);
+-	if (ret < 0) goto error;
+-
+-	ret = ioctl(fd, ASHMEM_SET_SIZE, size);
+-	if (ret < 0) goto error;
+-
+-	return fd;
+-error:
+-	close(fd);
+-	return ret;
++	/* Android portability: create a fixed-size anonymous shared region
++	 * with memfd_create() + ftruncate(), reached through syscall() so no
++	 * API-level gate and no libandroid.so are required. */
++#ifndef MFD_CLOEXEC
++#define MFD_CLOEXEC 0x0001U
+ #endif
++	int fd = (int) syscall(__NR_memfd_create, name, MFD_CLOEXEC);
++	if (fd < 0)
++		return fd;
++	if (ftruncate(fd, (off_t) size) != 0) {
++		int saved = errno;
++		close(fd);
++		errno = saved;
++		return -1;
++	}
++	return fd;
+ }
+ 
+ static void ashv_check_pid()
+@@ -349,7 +348,16 @@
+ 		// (3) If connected and opened, done. If connection refused
+ 		//     take ownership of the key and create the symlink.
+ 		// (4) If no symlink, create it.
+-		sprintf(symlink_path, ASHV_KEY_SYMLINK_PATH, key);
++		/* Android portability: the prebuilt bakes the Termux prefix into
++		 * _PATH_TMP, which is unwritable on a stock device, so the
++		 * symlink-coordination loop spins forever on EACCES. Derive the
++		 * directory from $TMPDIR at runtime. */
++		{
++			const char* d = getenv("TMPDIR");
++			if (d == NULL || d[0] == '\0')
++				d = "/data/local/tmp";
++			snprintf(symlink_path, sizeof(symlink_path), "%s/ashv_key_%d", d, key);
++		}
+ 		char path_buffer[256];
+ 		char num_buffer[64];
+ 		while (true) {

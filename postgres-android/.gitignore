@@ -1,0 +1,17 @@
+# Generated / build outputs — do not commit
+build/
+.gradle/
+local.properties
+*.apk
+*.aab
+
+# Native artifacts (built by scripts, not source)
+android-g4/**/app/src/main/jniLibs/**/*.so
+android-g4/**/app/src/main/assets/*.zip
+
+# Seeds and staged prefixes
+pg-seed/*.tar
+pg-seed/*.tar.*
+postgres-build/prefix/
+postgres-build/work/
+postgres-build/*.so
