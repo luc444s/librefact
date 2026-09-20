@@ -200,6 +200,34 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - Objetivo: hacer POS la ruta principal post-login y convertir el sidebar global en drawer mobile.
   - Header global se oculta en mobile; desktop conserva sidebar/header.
 
+- [ ] A.SPEC 0026 — Sales nota de venta document type
+  - Spec: `A-SPECS/0026-sales-nota-venta-document-type.md`.
+  - Objetivo: agregar `NOTA_VENTA` como opcion comercial junto a `FACTURA` y `BOLETA`.
+  - `NOTA_VENTA` debe ser el documento por defecto en Ventas y POS.
+  - Debe incluir el modulo de configuracion para crear/gestionar series `N###`/`N001`.
+  - Debe sembrar `N001` default para tenants existentes si falta.
+  - Debe actualizar la migracion de compras que toca `cfg_document_series` para no romper BD fresca.
+  - No debe agregar comportamiento SUNAT/Greenter.
+  - Debe preservar los correlativos `ORDEN_COMPRA` ya soportados en `cfg_document_series`.
+
+- [ ] A.SPEC 0027 — SUNAT fiscal emission from ERP
+  - Spec: `A-SPECS/0027-sunat-fiscal-emission-from-erp.md`.
+  - Objetivo: conectar órdenes confirmadas (`FACTURA`/`BOLETA`) con el pipeline real de SUNAT vía `greenter-adapter`.
+  - Nuevo módulo `plugins/ventas/facturacion/` con tabla `fiscal_emissions`, mapper, client HTTP y endpoints.
+  - Extender adapter `/documents/emit` con `auto_execute: true` para ejecutar pipeline completo (generate, sign, send).
+  - UI: badge de estado + botón Enviar/Reintentar en detalle de orden, página de emisiones.
+  - Excluir `NOTA_VENTA` de emisión SUNAT.
+  - Beta only para esta A.SPEC.
+
+- [x] A.SPEC 0029 — SUNAT issuer address, CDR parsing, and local ZIP storage
+  - Spec: `A-SPECS/0029-sunat-issuer-address-cdr-storage.md`.
+  - Mapper ERP usa variables separadas de domicilio fiscal del emisor y conserva `cod_local=0000`.
+  - CDR ZIP se decodifica y guarda bajo `storage/sunat/cdr/{ruc}/{tipo}/{serie-numero}/...`.
+  - Metadata CDR agregada a `fiscal_emissions` vía migración ventas `0010`.
+  - Parser CDR trata `ResponseCode=0` como aceptado aunque existan `cbc:Note` de observación.
+  - Tests unitarios de mapper/CDR y suite PHP del adapter pasan; prueba real beta queda gated.
+  - Commit del módulo ventas: `ff716d4`.
+
 ## Reglas Del Camino
 
 - Cada A.SPEC debe ser test-first.

@@ -15,7 +15,13 @@
     "ruc": "20123456789",
     "legal_name": "LIBREFACT DEMO SAC",
     "address": {
-      "cod_local": "0000"
+      "ubigueo": "130101",
+      "cod_local": "0000",
+      "direccion": "TRUJILLO",
+      "departamento": "LA LIBERTAD",
+      "provincia": "TRUJILLO",
+      "distrito": "TRUJILLO",
+      "codigo_pais": "PE"
     }
   },
   "customer": {

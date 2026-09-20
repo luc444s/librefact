@@ -31,7 +31,12 @@ final class EmitDocumentRequestMapperTest extends TestCase
         self::assertSame('20123456789', $request->issuer->ruc);
         self::assertSame('LIBREFACT DEMO SAC', $request->issuer->legalName);
         self::assertNotNull($request->issuer->address);
+        self::assertSame('130101', $request->issuer->address->ubigueo);
         self::assertSame('0000', $request->issuer->address->codLocal);
+        self::assertSame('TRUJILLO', $request->issuer->address->direccion);
+        self::assertSame('LA LIBERTAD', $request->issuer->address->departamento);
+        self::assertSame('TRUJILLO', $request->issuer->address->provincia);
+        self::assertSame('TRUJILLO', $request->issuer->address->distrito);
 
         self::assertSame('6', $request->customer->documentType);
         self::assertSame('20601234567', $request->customer->documentNumber);
@@ -47,6 +52,17 @@ final class EmitDocumentRequestMapperTest extends TestCase
         self::assertSame(100.0, $request->totals->taxable);
         self::assertSame(18.0, $request->totals->igv);
         self::assertSame(118.0, $request->totals->total);
+    }
+
+    public function testIssuerAddressDefaultsToCodLocal0000WhenMissing(): void
+    {
+        $payload = $this->validPayload();
+        unset($payload['issuer']['address']);
+
+        $request = (new EmitDocumentRequestMapper())->fromPayload($payload);
+
+        self::assertNotNull($request->issuer->address);
+        self::assertSame('0000', $request->issuer->address->codLocal);
     }
 
     /**
