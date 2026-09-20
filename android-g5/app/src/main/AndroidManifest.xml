@@ -4,6 +4,7 @@
     <application
         android:label="G5"
         android:allowBackup="false"
+        android:extractNativeLibs="true"
         android:theme="@android:style/Theme.Material.Light">
         <activity
             android:name=".MainActivity"

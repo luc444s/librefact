@@ -8,7 +8,10 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.systutor.g5"
+        // Must be 8 chars, same length as com.g4pg: the G4 PostgreSQL binaries
+        // embed the absolute prefix /data/data/<pkg>/files/usr, patched
+        // length-preserving to this package id at bundle time.
+        applicationId "com.g5pg"
         minSdk 26
         targetSdk 34
         versionCode 1
@@ -28,6 +31,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 chaquopy {
@@ -40,7 +49,10 @@ chaquopy {
             install("fastapi")
             install("uvicorn")
             install("sqlalchemy")
+            install("psycopg")
             install("pg8000")
+            install("greenlet")
+            install("python-multipart")
         }
     }
 }
