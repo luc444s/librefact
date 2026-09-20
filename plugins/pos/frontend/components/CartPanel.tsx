@@ -88,7 +88,7 @@ export function CartPanel({
         )}
       </section>
 
-        <aside className="rounded-3xl border border-border bg-card p-4 shadow-card">
+      <section className="rounded-3xl border border-border bg-card p-4 shadow-card">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Subtotal</span>
           <strong className="text-card-foreground">{formatSoles(total)}</strong>
@@ -106,8 +106,8 @@ export function CartPanel({
               onClick={() => onMethodChange(option)}
               className={
                 option === method
-                  ? "rounded-md border border-border bg-card px-2 py-2 text-xs font-bold text-foreground ring-1 ring-ring"
-                  : "rounded-md border border-border bg-card px-2 py-2 text-xs font-bold text-foreground"
+                  ? "rounded-md border border-primary bg-primary px-2 py-2 text-xs font-bold text-primary-foreground"
+                  : "rounded-md border border-primary/40 bg-primary/10 px-2 py-2 text-xs font-bold text-primary"
               }
             >
               {PAYMENT_METHOD_LABELS[option]}
@@ -123,7 +123,7 @@ export function CartPanel({
           <Button
             type="button"
             variant="secondary"
-            className="border-border bg-card text-foreground hover:bg-muted"
+            className="border-primary bg-primary text-primary-foreground hover:bg-primary/90"
             disabled={lines.length === 0 || !isOpen}
             onClick={onCharge}
           >
@@ -135,7 +135,7 @@ export function CartPanel({
             Abre la caja en la pestaña Cierre antes de cobrar.
           </p>
         ) : null}
-      </aside>
+      </section>
 
       <div className="grid grid-cols-2 gap-3">
         <Button type="button" variant="secondary" onClick={onGoToItems}>

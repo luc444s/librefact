@@ -104,8 +104,10 @@ export function ItemSearchPanel({ onAdd, onBack, cartCount, cartTotal }: ItemSea
                 className="grid gap-3 rounded-3xl border border-border bg-surface p-3 shadow-sm"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-bold text-foreground">{product.name}</h3>
+                  <div className="min-w-0 flex-1 pr-1">
+                    <h3 className="max-w-[11rem] whitespace-normal break-words text-sm font-bold leading-tight text-foreground sm:max-w-none">
+                      {product.name}
+                    </h3>
                     <p className="truncate text-xs text-muted-foreground">
                       {weightLabel ? `${weightLabel} · ` : ""}
                       {product.sku}
@@ -113,7 +115,7 @@ export function ItemSearchPanel({ onAdd, onBack, cartCount, cartTotal }: ItemSea
                   </div>
                   <div className="flex shrink-0 items-center gap-1.5">
                     {product.price === null ? (
-                      <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-1 text-xs font-bold text-destructive">
+                      <span className="whitespace-nowrap rounded-full bg-destructive/10 px-2 py-1 text-xs font-bold leading-none text-destructive">
                         Sin precio
                       </span>
                     ) : (

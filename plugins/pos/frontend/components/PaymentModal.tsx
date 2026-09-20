@@ -15,6 +15,7 @@ type PaymentModalProps = {
   onClose: () => void;
   isPending: boolean;
   error: string | null;
+  qrImage?: string;
 };
 
 export function PaymentModal({
@@ -27,6 +28,7 @@ export function PaymentModal({
   onClose,
   isPending,
   error,
+  qrImage,
 }: PaymentModalProps) {
   const isQrPayment = method === "YAPE_PLIN";
   const isCash = method === "EFECTIVO";
@@ -49,18 +51,26 @@ export function PaymentModal({
       <div className="grid gap-4">
         {isQrPayment ? (
           <div className="grid justify-items-center gap-2">
-            <div
-              aria-label="QR mock Yape/Plin"
-              className="h-48 w-48 rounded-lg border-8 border-background shadow-inner"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(0deg, hsl(var(--foreground)) 0 6px, transparent 6px 12px), repeating-linear-gradient(90deg, hsl(var(--foreground)) 0 6px, transparent 6px 12px)",
-                backgroundColor: "hsl(var(--background))",
-                boxShadow: "inset 0 0 0 1px hsl(var(--foreground))",
-              }}
-            />
+            {qrImage ? (
+              <img
+                src={qrImage}
+                alt="QR Yape/Plin"
+                className="h-48 w-48 rounded-lg border-8 border-background object-contain shadow-inner"
+              />
+            ) : (
+              <div
+                aria-label="QR mock Yape/Plin"
+                className="h-48 w-48 rounded-lg border-8 border-background shadow-inner"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(0deg, hsl(var(--foreground)) 0 6px, transparent 6px 12px), repeating-linear-gradient(90deg, hsl(var(--foreground)) 0 6px, transparent 6px 12px)",
+                  backgroundColor: "hsl(var(--background))",
+                  boxShadow: "inset 0 0 0 1px hsl(var(--foreground))",
+                }}
+              />
+            )}
             <p className="text-center text-xs text-muted-foreground">
-              QR de demostración. Confirma cuando el pago aparezca recibido.
+              {qrImage ? "Confirma cuando el pago aparezca recibido." : "QR de demostración. Configura tu QR real en ajustes."}
             </p>
           </div>
         ) : null}
