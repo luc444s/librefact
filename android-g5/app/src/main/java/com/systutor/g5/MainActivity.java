@@ -202,6 +202,26 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (webView == null) {
+            moveTaskToBack(true);
+            return;
+        }
+        webView.evaluateJavascript(
+                "(function(){try{return !!(window.__systutorHandleBack && window.__systutorHandleBack());}catch(e){return false;}})()",
+                value -> {
+                    if ("true".equals(value)) {
+                        return;
+                    }
+                    if (webView.canGoBack()) {
+                        webView.goBack();
+                        return;
+                    }
+                    moveTaskToBack(true);
+                });
+    }
+
     private void runAll() {
         try {
             File files = getFilesDir();

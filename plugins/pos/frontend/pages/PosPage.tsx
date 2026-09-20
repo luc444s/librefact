@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "../../../../apps/web/src/lib/react-query";
 
@@ -15,6 +15,10 @@ import type { CartLine, PaymentMethod, PosScreen } from "../types";
 
 const POS_TITLE_KEY = "pos.bodega.title";
 const POS_QR_KEY = "pos.bodega.qrImage";
+
+type BackAwareWindow = Window & {
+  __systutorHandleBack?: () => boolean;
+};
 
 const NAV_ITEMS: Array<{ screen: PosScreen; label: string; icon: "sale" | "items" | "product" | "close" }> = [
   { screen: "sale", label: "Venta", icon: "sale" },
@@ -71,6 +75,14 @@ function SettingsIcon() {
         strokeLinejoin="round"
         strokeWidth="1.35"
       />
+    </svg>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+      <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
     </svg>
   );
 }
@@ -196,6 +208,32 @@ export function PosPage() {
     setScreen("product");
   }
 
+  useEffect(() => {
+    const backAwareWindow = window as BackAwareWindow;
+    backAwareWindow.__systutorHandleBack = () => {
+      if (isPaymentOpen) {
+        setIsPaymentOpen(false);
+        return true;
+      }
+      if (isSettingsOpen) {
+        setIsSettingsOpen(false);
+        return true;
+      }
+      if (isSaleScannerOpen) {
+        setIsSaleScannerOpen(false);
+        return true;
+      }
+      if (screen !== "sale") {
+        setScreen("sale");
+        return true;
+      }
+      return false;
+    };
+    return () => {
+      delete backAwareWindow.__systutorHandleBack;
+    };
+  }, [isPaymentOpen, isSettingsOpen, isSaleScannerOpen, screen]);
+
   async function handleSaleBarcode(barcode: string) {
     setSaleScanMessage(null);
     try {
@@ -221,11 +259,24 @@ export function PosPage() {
     }
   }
 
+  function openSidebar() {
+    window.dispatchEvent(new Event("systutor:open-sidebar"));
+  }
+
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-3 pb-24">
-      <header className="rounded-b-[2rem] border border-border bg-sidebar p-4 text-sidebar-foreground shadow-card">
+      <header className="-mx-3 rounded-b-[2rem] border border-border bg-sidebar p-4 text-sidebar-foreground shadow-card lg:-mx-6">
         <div className="flex items-center justify-between gap-3">
-          <div>
+          <button
+            type="button"
+            aria-label="Abrir menú"
+            title="Menú"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-sidebar-foreground/90 transition hover:bg-background/10 hover:text-sidebar-foreground"
+            onClick={openSidebar}
+          >
+            <MenuIcon />
+          </button>
+          <div className="min-w-0 flex-1">
             <span className="text-[0.65rem] font-black uppercase tracking-wide text-sidebar-muted">POS Bodega</span>
             <strong className="block text-xl leading-tight">{posTitle.trim() || "Bodega Express"}</strong>
           </div>
