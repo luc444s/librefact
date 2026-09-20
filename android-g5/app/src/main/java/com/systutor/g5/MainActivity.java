@@ -3,6 +3,13 @@ package com.systutor.g5;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -30,6 +37,7 @@ public class MainActivity extends Activity {
 
     private final StringBuilder uiLog = new StringBuilder();
     private TextView tv;
+    private WebView webView;
     private Process pg;
     private volatile boolean pgReady = false;
 
@@ -47,10 +55,47 @@ public class MainActivity extends Activity {
         sv.addView(tv);
         setContentView(sv);
 
+        createWebView();
+
         if (!Python.isStarted()) {
             Python.start(new AndroidPlatform(this));
         }
         new Thread(this::runAll).start();
+    }
+
+    private void createWebView() {
+        WebView.setWebContentsDebuggingEnabled(true);
+        webView = new WebView(this);
+        WebSettings ws = webView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage message) {
+                Log.i(TAG, "console[" + message.messageLevel() + "] "
+                        + message.message() + " @ " + message.sourceId()
+                        + ":" + message.lineNumber());
+                return true;
+            }
+        });
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request,
+                                        WebResourceError error) {
+                Log.i(TAG, "webview error: " + error.getDescription()
+                        + " " + request.getUrl());
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                Log.i(TAG, "webview loaded: " + url);
+                view.evaluateJavascript(
+                        "(document.body ? document.body.innerText.slice(0, 200) : 'no-body')",
+                        value -> Log.i(TAG, "webview body=" + value));
+            }
+        });
+        Log.i(TAG, "webview warming up");
+        webView.loadUrl("about:blank");
     }
 
     private void runAll() {
@@ -60,6 +105,12 @@ public class MainActivity extends Activity {
 
             out("filesDir=" + files);
             out("nativeLibraryDir=" + nativeDir);
+
+            File webapp = new File(files, "webapp");
+            if (!new File(webapp, "index.html").exists()) {
+                out("-- extracting webapp.zip --");
+                extractZip("webapp.zip", webapp);
+            }
 
             launchPostgres(files, nativeDir);
             if (!waitReady(120)) {
@@ -72,12 +123,22 @@ public class MainActivity extends Activity {
             String core = py.getModule("g5core")
                     .callAttr("run", files.getAbsolutePath()).toString();
             out(stack + "\n--- systutor-core (postgresql) ---\n" + core);
+
+            showWebApp();
         } catch (Throwable t) {
             out("FATAL " + t);
         } finally {
             final String text = uiLog.toString();
             runOnUiThread(() -> tv.setText(text));
         }
+    }
+
+    private void showWebApp() {
+        runOnUiThread(() -> {
+            setContentView(webView);
+            Log.i(TAG, "webview loading app");
+            webView.loadUrl("http://127.0.0.1:8000/");
+        });
     }
 
     private void launchPostgres(File files, File nativeDir) throws IOException {

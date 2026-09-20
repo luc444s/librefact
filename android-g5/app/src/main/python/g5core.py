@@ -69,6 +69,28 @@ def _pg_probe():
     return "psycopg {} -> {}".format(psycopg.__version__, version)
 
 
+def _mount_spa(app, web_dir):
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    index = web_dir / "index.html"
+    if not index.exists():
+        return False
+
+    assets = web_dir / "assets"
+    if assets.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(assets)), name="webapp-assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa_fallback(full_path: str):
+        candidate = web_dir / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(str(candidate))
+        return FileResponse(str(index))
+
+    return True
+
+
 def run(files_dir):
     lines = []
     try:
@@ -90,6 +112,12 @@ def run(files_dir):
             seed = seed_demo_data(db, settings, app.state.plugin_runtime.list_results())
         lines.append("core boot OK | app={} | tenant={}".format(
             settings.app_name, seed["tenant_id"]))
+
+        web_dir = Path(files_dir) / "webapp"
+        if _mount_spa(app, web_dir):
+            lines.append("spa served from {}".format(web_dir))
+        else:
+            lines.append("spa NOT found at {}".format(web_dir))
 
         import uvicorn
 
@@ -116,6 +144,10 @@ def run(files_dir):
 
         users = _http("GET", "/users", token=login["access_token"])
         lines.append("users OK | count={}".format(len(users)))
+
+        with urllib.request.urlopen("http://127.0.0.1:{}/".format(PORT), timeout=5) as resp:
+            html = resp.read().decode("utf-8", "replace")
+        lines.append("index OK | SYSTUTOR={}".format("SYSTUTOR" in html))
 
         lines.append("PORT {} listening".format(PORT))
     except Exception as exc:  # noqa: BLE001
