@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+    id 'com.chaquo.python'
+}
+
+android {
+    namespace 'com.systutor.g5'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.systutor.g5"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+chaquopy {
+    defaultConfig {
+        version = "3.11"
+        buildPython("/home/linuxbrew/.linuxbrew/bin/python3.11")
+        pip {
+            install("wheels/pydantic_core-2.46.5-cp311-cp311-android_26_armeabi_v7a.whl")
+            install("pydantic==2.13.5")
+            install("fastapi")
+            install("uvicorn")
+            install("sqlalchemy")
+            install("pg8000")
+        }
+    }
+}
