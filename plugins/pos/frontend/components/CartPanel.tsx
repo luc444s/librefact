@@ -20,6 +20,28 @@ type CartPanelProps = {
 
 const METHODS: PaymentMethod[] = ["EFECTIVO", "YAPE_PLIN", "TARJETA"];
 
+function ScanIcon() {
+  return (
+    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+      <path
+        d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.8"
+      />
+      <path d="M7 8v8M10 8v8M13 8v8M17 8v8" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeLinecap="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
 export function CartPanel({
   lines,
   session,
@@ -40,15 +62,51 @@ export function CartPanel({
 
   return (
     <div className="grid gap-3">
+      <div className="grid grid-cols-2 gap-3">
+        <Button
+          type="button"
+          variant="secondary"
+          aria-label="Escanear"
+          title="Escanear"
+          className="flex h-12 items-center justify-center border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+          onClick={onScan}
+        >
+          <ScanIcon />
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          aria-label="Agregar"
+          title="Agregar"
+          className="flex h-12 items-center justify-center"
+          onClick={onGoToItems}
+        >
+          <PlusIcon />
+        </Button>
+      </div>
+
       <section className="rounded-3xl border border-border bg-card p-4 shadow-card">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-bold text-card-foreground">Venta rápida</h2>
             <p className="text-xs text-muted-foreground">Carrito listo para cobrar.</p>
           </div>
-          <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground">
-            {itemCount} items
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-muted-foreground">
+              {itemCount} items
+            </span>
+            <button
+              type="button"
+              aria-label="Cancelar venta"
+              disabled={lines.length === 0}
+              onClick={() => {
+                if (window.confirm("¿Cancelar la venta y vaciar el carrito?")) onClear();
+              }}
+              className="rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-1 text-xs font-bold text-destructive disabled:opacity-40"
+            >
+              Cancelar venta
+            </button>
+          </div>
         </div>
 
         {lines.length === 0 ? (
@@ -154,23 +212,6 @@ export function CartPanel({
         </section>
       ) : null}
 
-      <div className="grid grid-cols-3 gap-3">
-        <Button type="button" variant="secondary" onClick={onScan}>
-          Escanear
-        </Button>
-        <Button type="button" variant="secondary" onClick={onGoToItems}>
-          + Agregar
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="border-destructive/40 bg-destructive/10 text-destructive"
-          onClick={onClear}
-          disabled={lines.length === 0}
-        >
-          Cancelar venta
-        </Button>
-      </div>
     </div>
   );
 }

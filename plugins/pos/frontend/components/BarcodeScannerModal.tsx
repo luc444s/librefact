@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { BarcodeFormat, BrowserMultiFormatReader } from "@zxing/browser";
+import { BarcodeFormat, BrowserMultiFormatOneDReader } from "@zxing/browser";
 import type { IScannerControls } from "@zxing/browser";
 import { Button } from "@systutor/shell/ui/button";
 
@@ -34,6 +34,14 @@ function cameraStartError(error: unknown) {
   return "No se pudo iniciar la cámara. Verifica HTTPS, permisos y que otra app no esté usando la cámara.";
 }
 
+function CheckIcon() {
+  return (
+    <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+      <path d="M5 12.5 9.5 17 19 7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    </svg>
+  );
+}
+
 export function BarcodeScannerModal({ open, title, onDetected, onClose, continuous = false, preview }: BarcodeScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
@@ -65,16 +73,23 @@ export function BarcodeScannerModal({ open, title, onDetected, onClose, continuo
     setError(null);
     setIsScanning(true);
     try {
-      const reader = new BrowserMultiFormatReader();
+      const reader = new BrowserMultiFormatOneDReader();
       reader.possibleFormats = [
         BarcodeFormat.EAN_13,
         BarcodeFormat.EAN_8,
         BarcodeFormat.UPC_A,
         BarcodeFormat.UPC_E,
-        BarcodeFormat.CODE_128,
       ];
       const controls = await reader.decodeFromConstraints(
-        { video: { facingMode: { ideal: "environment" } }, audio: false },
+        {
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30 },
+          },
+          audio: false,
+        },
         videoRef.current,
         (result, _error, controls) => {
           const text = result?.getText().trim();
@@ -125,9 +140,6 @@ export function BarcodeScannerModal({ open, title, onDetected, onClose, continuo
             <h2 className="text-base font-black">{title}</h2>
             <p className="text-xs text-muted-foreground">Apunta la cámara al código EAN/UPC del producto.</p>
           </div>
-          <Button type="button" variant="secondary" onClick={close}>
-            Cancelar
-          </Button>
         </header>
 
         <main className="relative min-h-0 bg-black">
@@ -140,13 +152,19 @@ export function BarcodeScannerModal({ open, title, onDetected, onClose, continuo
               </div>
             </div>
           ) : null}
-          <div className="pointer-events-none absolute inset-x-8 top-1/2 h-28 -translate-y-1/2 rounded-3xl border-2 border-primary/90 shadow-[0_0_0_999px_rgba(0,0,0,0.25)]" />
+          <div className="pointer-events-none absolute inset-x-4 top-1/2 h-40 -translate-y-1/2 rounded-3xl border-2 border-primary/90 shadow-[0_0_0_999px_rgba(0,0,0,0.25)]" />
           {preview ? <div className="absolute inset-x-3 bottom-3">{preview}</div> : null}
         </main>
 
         <footer className="grid gap-2 border-t border-border bg-card/95 p-4">
-          <Button type="button" className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={isScanning} onClick={startScan}>
-            {isScanning ? "Escaneando..." : "Reintentar"}
+          <Button
+            type="button"
+            aria-label="Cerrar escáner"
+            title="Cerrar escáner"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={close}
+          >
+            <CheckIcon />
           </Button>
         </footer>
       </div>

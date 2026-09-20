@@ -87,7 +87,6 @@ export function ItemSearchPanel({
 
         <div className="flex gap-2">
           <Input
-            autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Escanea o busca: leche, arroz, 775..."

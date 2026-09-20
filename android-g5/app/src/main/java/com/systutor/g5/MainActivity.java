@@ -211,10 +211,8 @@ public class MainActivity extends Activity {
             out("nativeLibraryDir=" + nativeDir);
 
             File webapp = new File(files, "webapp");
-            if (!new File(webapp, "index.html").exists()) {
-                out("-- extracting webapp.zip --");
-                extractZip("webapp.zip", webapp);
-            }
+            out("-- refreshing webapp.zip --");
+            extractZip("webapp.zip", webapp);
 
             if (!new File(files, "plugins/productos/plugin.json").exists()) {
                 out("-- extracting plugins.zip --");
@@ -256,6 +254,7 @@ public class MainActivity extends Activity {
         runOnUiThread(() -> {
             setContentView(webView);
             Log.i(TAG, "webview loading app");
+            webView.clearCache(true);
             webView.loadUrl("http://127.0.0.1:8000/");
         });
     }

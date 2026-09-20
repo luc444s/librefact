@@ -45,7 +45,8 @@ export function PaymentModal({
           : "Confirma que el cliente pagó antes de registrar la venta."
       }
       onClose={onClose}
-      maxWidthClassName="max-w-md"
+      maxWidthClassName={isQrPayment ? "max-w-xl" : "max-w-md"}
+      maxHeightClassName={isQrPayment ? "max-h-[95vh]" : undefined}
       zIndexClassName="z-[1000]"
     >
       <div className="grid gap-4">
@@ -55,12 +56,12 @@ export function PaymentModal({
               <img
                 src={qrImage}
                 alt="QR Yape/Plin"
-                className="h-48 w-48 rounded-lg border-8 border-background object-contain shadow-inner"
+                className="h-[min(78vw,52vh,28rem)] w-[min(78vw,52vh,28rem)] rounded-lg border-4 border-background object-contain shadow-inner"
               />
             ) : (
               <div
                 aria-label="QR mock Yape/Plin"
-                className="h-48 w-48 rounded-lg border-8 border-background shadow-inner"
+                className="h-[min(78vw,52vh,28rem)] w-[min(78vw,52vh,28rem)] rounded-lg border-4 border-background shadow-inner"
                 style={{
                   backgroundImage:
                     "repeating-linear-gradient(0deg, hsl(var(--foreground)) 0 6px, transparent 6px 12px), repeating-linear-gradient(90deg, hsl(var(--foreground)) 0 6px, transparent 6px 12px)",
