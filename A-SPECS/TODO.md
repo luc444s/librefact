@@ -200,7 +200,7 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - Objetivo: hacer POS la ruta principal post-login y convertir el sidebar global en drawer mobile.
   - Header global se oculta en mobile; desktop conserva sidebar/header.
 
-- [ ] A.SPEC 0026 — Sales nota de venta document type
+- [x] A.SPEC 0026 — Sales nota de venta document type
   - Spec: `A-SPECS/0026-sales-nota-venta-document-type.md`.
   - Objetivo: agregar `NOTA_VENTA` como opcion comercial junto a `FACTURA` y `BOLETA`.
   - `NOTA_VENTA` debe ser el documento por defecto en Ventas y POS.
@@ -209,8 +209,9 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - Debe actualizar la migracion de compras que toca `cfg_document_series` para no romper BD fresca.
   - No debe agregar comportamiento SUNAT/Greenter.
   - Debe preservar los correlativos `ORDEN_COMPRA` ya soportados en `cfg_document_series`.
+  - Commit raíz (configuracion + POS): `488a6e9`; reglas de captura en ventas: `ff716d4`.
 
-- [ ] A.SPEC 0027 — SUNAT fiscal emission from ERP
+- [x] A.SPEC 0027 — SUNAT fiscal emission from ERP
   - Spec: `A-SPECS/0027-sunat-fiscal-emission-from-erp.md`.
   - Objetivo: conectar órdenes confirmadas (`FACTURA`/`BOLETA`) con el pipeline real de SUNAT vía `greenter-adapter`.
   - Nuevo módulo `plugins/ventas/facturacion/` con tabla `fiscal_emissions`, mapper, client HTTP y endpoints.
@@ -218,6 +219,15 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - UI: badge de estado + botón Enviar/Reintentar en detalle de orden, página de emisiones.
   - Excluir `NOTA_VENTA` de emisión SUNAT.
   - Beta only para esta A.SPEC.
+  - Commit raíz (adapter `auto_execute`): `f2c35f4`; módulo `facturacion/`: `ff716d4`.
+  - Pendiente: smoke de BOLETA emitida desde el ERP contra beta.
+
+- [x] A.SPEC 0028 — Editable Peru invoice fields in sales
+  - Spec: `A-SPECS/0028-editable-peru-invoice-fields.md`.
+  - Objetivo: exponer y editar datos fiscales peruanos (RUC, razon social, direccion fiscal, valor venta, IGV, totales) en la creacion de ventas.
+  - Persiste `ventas_orders.customer_address` y `ventas_order_items.tax_rate`.
+  - Mapper SUNAT envia IGV y `tax_rate` por linea; adapter default `18.0`.
+  - Commit raíz (adapter por linea): `f2b33ff`; persistencia y edicion en ventas: `ff716d4`.
 
 - [x] A.SPEC 0029 — SUNAT issuer address, CDR parsing, and local ZIP storage
   - Spec: `A-SPECS/0029-sunat-issuer-address-cdr-storage.md`.
