@@ -112,6 +112,22 @@ public class MainActivity extends Activity {
                 extractZip("webapp.zip", webapp);
             }
 
+            if (!new File(files, "plugins/productos/plugin.json").exists()) {
+                out("-- extracting plugins.zip --");
+                extractZip("plugins.zip", files);
+            }
+
+            File seedCsv = new File(files, "seed_productos.csv");
+            if (!seedCsv.exists()) {
+                out("-- copying seed_productos.csv --");
+                copyAsset("seed_productos.csv", seedCsv);
+            }
+
+            if (!new File(files, "usr/lib/postgresql").isDirectory()) {
+                out("-- extracting pgextensions.zip --");
+                extractZip("pgextensions.zip", files);
+            }
+
             launchPostgres(files, nativeDir);
             if (!waitReady(120)) {
                 out("FATAL postgres not ready");
@@ -141,8 +157,29 @@ public class MainActivity extends Activity {
         });
     }
 
+    private boolean portOpen(int port) {
+        try (java.net.Socket socket = new java.net.Socket()) {
+            socket.connect(new java.net.InetSocketAddress("127.0.0.1", port), 500);
+            return true;
+        } catch (IOException exc) {
+            return false;
+        }
+    }
+
     private void launchPostgres(File files, File nativeDir) throws IOException {
         File pgdata = new File(files, "pgdata");
+
+        if (portOpen(PG_PORT)) {
+            out("-- reusing running postmaster on " + PG_PORT + " --");
+            pgReady = true;
+            return;
+        }
+
+        File pidFile = new File(pgdata, "postmaster.pid");
+        if (pidFile.exists()) {
+            out("-- removing stale postmaster.pid --");
+            pidFile.delete();
+        }
 
         if (!new File(pgdata, "PG_VERSION").exists()) {
             out("-- extracting pgsupport.zip --");
@@ -180,6 +217,12 @@ public class MainActivity extends Activity {
         cmd.add("shared_buffers=16MB");
         cmd.add("-c");
         cmd.add("max_connections=5");
+        cmd.add("-c");
+        cmd.add("log_min_messages=warning");
+        cmd.add("-c");
+        cmd.add("log_statement=none");
+        cmd.add("-c");
+        cmd.add("log_min_duration_statement=-1");
 
         ProcessBuilder pb = new ProcessBuilder(cmd);
         pb.redirectErrorStream(true);
@@ -194,9 +237,14 @@ public class MainActivity extends Activity {
             try (BufferedReader r = new BufferedReader(new InputStreamReader(is))) {
                 String line;
                 while ((line = r.readLine()) != null) {
-                    Log.i(TAG, "[pg] " + line);
                     if (line.contains("ready to accept connections")) {
                         pgReady = true;
+                    }
+                    if (line.contains("ready to accept connections")
+                            || line.contains("ERROR")
+                            || line.contains("FATAL")
+                            || line.contains("PANIC")) {
+                        Log.i(TAG, "[pg] " + line);
                     }
                 }
             } catch (Throwable ignored) {
@@ -246,6 +294,18 @@ public class MainActivity extends Activity {
                         o.write(buf, 0, n);
                     }
                 }
+            }
+        }
+    }
+
+    private void copyAsset(String asset, File dest) throws IOException {
+        dest.getParentFile().mkdirs();
+        try (InputStream in = getAssets().open(asset);
+             OutputStream o = new FileOutputStream(dest)) {
+            byte[] buf = new byte[16384];
+            int n;
+            while ((n = in.read(buf)) > 0) {
+                o.write(buf, 0, n);
             }
         }
     }

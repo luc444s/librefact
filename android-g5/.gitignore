@@ -11,3 +11,7 @@ app/src/main/python/app/
 app/src/main/jniLibs/
 app/src/main/assets/pgsupport.zip
 app/src/main/assets/webapp.zip
+app/src/main/assets/plugins.zip
+app/src/main/assets/pgextensions.zip
+app/src/main/assets/seed_productos.csv
+app/src/main/python/g5_products_importer.py
