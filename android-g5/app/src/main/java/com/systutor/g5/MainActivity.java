@@ -1,9 +1,16 @@
 package com.systutor.g5;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
+import android.webkit.PermissionRequest;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -34,12 +41,15 @@ import java.util.zip.ZipInputStream;
 public class MainActivity extends Activity {
     private static final String TAG = "G5";
     private static final int PG_PORT = 54329;
+    private static final int PERMISSION_REQUEST = 1000;
+    private static final int FILE_CHOOSER_REQUEST = 1001;
 
     private final StringBuilder uiLog = new StringBuilder();
     private TextView tv;
     private WebView webView;
     private Process pg;
     private volatile boolean pgReady = false;
+    private ValueCallback<Uri[]> filePathCallback;
 
     private synchronized void out(String s) {
         uiLog.append(s).append("\n");
@@ -56,6 +66,7 @@ public class MainActivity extends Activity {
         setContentView(sv);
 
         createWebView();
+        requestAppPermissions();
 
         if (!Python.isStarted()) {
             Python.start(new AndroidPlatform(this));
@@ -69,6 +80,7 @@ public class MainActivity extends Activity {
         WebSettings ws = webView.getSettings();
         ws.setJavaScriptEnabled(true);
         ws.setDomStorageEnabled(true);
+        ws.setMediaPlaybackRequiresUserGesture(false);
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onConsoleMessage(ConsoleMessage message) {
@@ -76,6 +88,39 @@ public class MainActivity extends Activity {
                         + message.message() + " @ " + message.sourceId()
                         + ":" + message.lineNumber());
                 return true;
+            }
+
+            @Override
+            public void onPermissionRequest(PermissionRequest request) {
+                Log.i(TAG, "webview permission request: " + java.util.Arrays.toString(
+                        request.getResources()));
+                for (String resource : request.getResources()) {
+                    if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)
+                            || PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(resource)) {
+                        request.grant(request.getResources());
+                        return;
+                    }
+                }
+                super.onPermissionRequest(request);
+            }
+
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback,
+                                             FileChooserParams params) {
+                if (filePathCallback != null) {
+                    filePathCallback.onReceiveValue(null);
+                }
+                filePathCallback = callback;
+                try {
+                    Intent intent = params.createIntent();
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    startActivityForResult(intent, FILE_CHOOSER_REQUEST);
+                    return true;
+                } catch (Exception exc) {
+                    Log.i(TAG, "file chooser error: " + exc);
+                    filePathCallback = null;
+                    return false;
+                }
             }
         });
         webView.setWebViewClient(new WebViewClient() {
@@ -96,6 +141,65 @@ public class MainActivity extends Activity {
         });
         Log.i(TAG, "webview warming up");
         webView.loadUrl("about:blank");
+    }
+
+    private void requestAppPermissions() {
+        List<String> needed = new ArrayList<>();
+        needed.add(Manifest.permission.CAMERA);
+        if (Build.VERSION.SDK_INT >= 33) {
+            needed.add(Manifest.permission.READ_MEDIA_IMAGES);
+            needed.add(Manifest.permission.READ_MEDIA_VIDEO);
+            if (Build.VERSION.SDK_INT >= 34) {
+                needed.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED);
+            }
+        } else {
+            needed.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+
+        List<String> pending = new ArrayList<>();
+        for (String permission : needed) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                pending.add(permission);
+            }
+        }
+        if (!pending.isEmpty()) {
+            requestPermissions(pending.toArray(new String[0]), PERMISSION_REQUEST);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode == PERMISSION_REQUEST) {
+            for (int i = 0; i < permissions.length; i++) {
+                Log.i(TAG, "permission " + permissions[i] + " -> "
+                        + (results[i] == PackageManager.PERMISSION_GRANTED ? "granted" : "denied"));
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != FILE_CHOOSER_REQUEST) {
+            return;
+        }
+        Uri[] results = null;
+        if (resultCode == RESULT_OK && data != null) {
+            if (data.getClipData() != null) {
+                int count = data.getClipData().getItemCount();
+                results = new Uri[count];
+                for (int i = 0; i < count; i++) {
+                    results[i] = data.getClipData().getItemAt(i).getUri();
+                }
+            } else if (data.getData() != null) {
+                results = new Uri[]{data.getData()};
+            }
+        }
+        if (filePathCallback != null) {
+            filePathCallback.onReceiveValue(results);
+            filePathCallback = null;
+        }
     }
 
     private void runAll() {
