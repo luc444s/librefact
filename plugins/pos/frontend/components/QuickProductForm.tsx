@@ -1,25 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@systutor/shell/ui/button";
 import { Input } from "@systutor/shell/ui/input";
 import { useMutation, useQuery } from "../../../../apps/web/src/lib/react-query";
 
 import { listLines } from "../../../productos/frontend/api";
 import { createQuickProduct } from "../api";
+import { BarcodeScannerModal } from "./BarcodeScannerModal";
 import type { CartLine } from "../types";
 
 type QuickProductFormProps = {
+  initialBarcode?: string;
   onCreated: (line: Omit<CartLine, "quantity">) => void;
   onCancel: () => void;
 };
 
-export function QuickProductForm({ onCreated, onCancel }: QuickProductFormProps) {
+export function QuickProductForm({ initialBarcode = "", onCreated, onCancel }: QuickProductFormProps) {
   const [name, setName] = useState("");
-  const [barcode, setBarcode] = useState("");
+  const [barcode, setBarcode] = useState(initialBarcode);
   const [salePrice, setSalePrice] = useState("");
   const [initialStock, setInitialStock] = useState("");
   const [weightKg, setWeightKg] = useState("");
   const [lineId, setLineId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+  useEffect(() => {
+    if (initialBarcode) setBarcode(initialBarcode);
+  }, [initialBarcode]);
 
   const linesQuery = useQuery({
     queryKey: ["pos", "quick-product", "lines"],
@@ -64,7 +71,12 @@ export function QuickProductForm({ onCreated, onCancel }: QuickProductFormProps)
       >
         <label className="grid gap-1 text-sm">
           <span className="font-semibold text-muted-foreground">Barcode</span>
-          <Input value={barcode} onChange={(event) => setBarcode(event.target.value)} placeholder="7751271013109" />
+          <div className="flex gap-2">
+            <Input value={barcode} onChange={(event) => setBarcode(event.target.value)} placeholder="7751271013109" />
+            <Button type="button" variant="secondary" className="shrink-0" onClick={() => setIsScannerOpen(true)}>
+              Barcode
+            </Button>
+          </div>
         </label>
 
         <label className="grid gap-1 text-sm">
@@ -133,6 +145,16 @@ export function QuickProductForm({ onCreated, onCancel }: QuickProductFormProps)
           </Button>
         </div>
       </form>
+
+      <BarcodeScannerModal
+        open={isScannerOpen}
+        title="Escanear barcode"
+        onDetected={(value) => {
+          setBarcode(value);
+          setIsScannerOpen(false);
+        }}
+        onClose={() => setIsScannerOpen(false)}
+      />
     </section>
   );
 }

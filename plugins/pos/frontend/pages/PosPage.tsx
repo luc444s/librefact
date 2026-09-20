@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "../../../../apps/web/src/lib/react-query";
 
-import { checkout, closeSession, getCurrentSession, openSession } from "../api";
+import { checkout, closeSession, getCurrentSession, openSession, searchPosProducts } from "../api";
+import { BarcodeScannerModal } from "../components/BarcodeScannerModal";
 import { CartPanel } from "../components/CartPanel";
 import { CashClosePanel } from "../components/CashClosePanel";
 import { ItemSearchPanel } from "../components/ItemSearchPanel";
@@ -81,8 +82,12 @@ export function PosPage() {
   const [receivedAmount, setReceivedAmount] = useState("");
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSaleScannerOpen, setIsSaleScannerOpen] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const [saleScanMessage, setSaleScanMessage] = useState<string | null>(null);
+  const [itemsInitialQuery, setItemsInitialQuery] = useState("");
+  const [quickProductBarcode, setQuickProductBarcode] = useState("");
   const [posTitle, setPosTitleState] = useState(() => localStorage.getItem(POS_TITLE_KEY) || "Bodega Express");
   const [qrImage, setQrImageState] = useState(() => localStorage.getItem(POS_QR_KEY) || "");
 
@@ -186,6 +191,36 @@ export function PosPage() {
     else localStorage.removeItem(POS_QR_KEY);
   }
 
+  function openQuickProduct(barcode = "") {
+    setQuickProductBarcode(barcode);
+    setScreen("product");
+  }
+
+  async function handleSaleBarcode(barcode: string) {
+    setSaleScanMessage(null);
+    try {
+      const [product] = await searchPosProducts(barcode, 1);
+      if (!product) {
+        setIsSaleScannerOpen(false);
+        setSaleScanMessage(`No encontramos un producto con barcode ${barcode}.`);
+        toast.warning("Producto no encontrado");
+        setQuickProductBarcode(barcode);
+        return;
+      }
+      if (product.price === null) {
+        setIsSaleScannerOpen(false);
+        setItemsInitialQuery(barcode);
+        setScreen("items");
+        toast.info("Producto sin precio. Fija el precio para agregarlo.");
+        return;
+      }
+      addLine({ productId: product.id, name: product.name, unitPrice: product.price });
+      toast.success("Producto agregado al carrito");
+    } catch (error) {
+      setSaleScanMessage(error instanceof Error ? error.message : "No se pudo buscar el barcode escaneado");
+    }
+  }
+
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-3 pb-24">
       <header className="rounded-b-[2rem] border border-border bg-sidebar p-4 text-sidebar-foreground shadow-card">
@@ -217,6 +252,9 @@ export function PosPage() {
           onClear={() => setLines([])}
           onCharge={openPayment}
           onGoToItems={() => setScreen("items")}
+          onScan={() => setIsSaleScannerOpen(true)}
+          scanMessage={saleScanMessage}
+          onCreateProduct={quickProductBarcode ? () => openQuickProduct(quickProductBarcode) : undefined}
         />
       ) : null}
 
@@ -224,6 +262,8 @@ export function PosPage() {
         <ItemSearchPanel
           onAdd={addLine}
           onBack={() => setScreen("sale")}
+          initialQuery={itemsInitialQuery}
+          onCreateProduct={openQuickProduct}
           cartCount={cartCount}
           cartTotal={cartTotal}
         />
@@ -231,12 +271,17 @@ export function PosPage() {
 
       {screen === "product" ? (
         <QuickProductForm
+          initialBarcode={quickProductBarcode}
           onCreated={(line) => {
             addLine(line);
+            setQuickProductBarcode("");
             toast.success("Producto agregado al carrito");
             setScreen("sale");
           }}
-          onCancel={() => setScreen("sale")}
+          onCancel={() => {
+            setQuickProductBarcode("");
+            setScreen("sale");
+          }}
         />
       ) : null}
 
@@ -271,6 +316,39 @@ export function PosPage() {
         onTitleChange={setPosTitle}
         onQrImageChange={setQrImage}
         onClose={() => setIsSettingsOpen(false)}
+      />
+
+      <BarcodeScannerModal
+        open={isSaleScannerOpen}
+        title="Escanear para vender"
+        onDetected={handleSaleBarcode}
+        onClose={() => setIsSaleScannerOpen(false)}
+        continuous
+        preview={
+          <div className="rounded-3xl border border-border bg-card/95 p-3 text-card-foreground shadow-card backdrop-blur">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-bold text-muted-foreground">Carrito</span>
+                <strong className="block text-sm">{cartCount} items</strong>
+              </div>
+              <strong className="text-lg leading-none">{formatSoles(cartTotal)}</strong>
+            </div>
+            {lines.length > 0 ? (
+              <div className="mt-2 grid gap-1 border-t border-border pt-2">
+                {lines.slice(-3).reverse().map((line) => (
+                  <div key={line.productId} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="min-w-0 truncate text-muted-foreground">
+                      {line.quantity} x {line.name}
+                    </span>
+                    <b className="shrink-0 text-card-foreground">{formatSoles(line.unitPrice * line.quantity)}</b>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">Escanea productos para agregarlos.</p>
+            )}
+          </div>
+        }
       />
 
       <nav className="fixed inset-x-0 bottom-3 z-20 mx-auto grid max-w-3xl grid-cols-5 gap-1.5 rounded-3xl border border-border bg-card/95 p-2 shadow-card backdrop-blur">

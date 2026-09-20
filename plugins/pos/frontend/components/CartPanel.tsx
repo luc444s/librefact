@@ -13,6 +13,9 @@ type CartPanelProps = {
   onClear: () => void;
   onCharge: () => void;
   onGoToItems: () => void;
+  onScan: () => void;
+  scanMessage?: string | null;
+  onCreateProduct?: () => void;
 };
 
 const METHODS: PaymentMethod[] = ["EFECTIVO", "YAPE_PLIN", "TARJETA"];
@@ -27,6 +30,9 @@ export function CartPanel({
   onClear,
   onCharge,
   onGoToItems,
+  onScan,
+  scanMessage,
+  onCreateProduct,
 }: CartPanelProps) {
   const itemCount = lines.reduce((total, line) => total + line.quantity, 0);
   const total = lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0);
@@ -137,9 +143,23 @@ export function CartPanel({
         ) : null}
       </section>
 
-      <div className="grid grid-cols-2 gap-3">
+      {scanMessage ? (
+        <section className="grid gap-2 rounded-3xl border border-primary/30 bg-primary/10 p-4 text-sm text-primary">
+          <p className="font-semibold">{scanMessage}</p>
+          {onCreateProduct ? (
+            <Button type="button" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={onCreateProduct}>
+              Producto rápido
+            </Button>
+          ) : null}
+        </section>
+      ) : null}
+
+      <div className="grid grid-cols-3 gap-3">
+        <Button type="button" variant="secondary" onClick={onScan}>
+          Escanear
+        </Button>
         <Button type="button" variant="secondary" onClick={onGoToItems}>
-          + Agregar productos
+          + Agregar
         </Button>
         <Button
           type="button"

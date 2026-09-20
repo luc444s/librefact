@@ -1,24 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@systutor/shell/ui/button";
 import { Input } from "@systutor/shell/ui/input";
 import { useMutation, useQuery } from "../../../../apps/web/src/lib/react-query";
 
 import { searchPosProducts, setPosProductPrice } from "../api";
+import { BarcodeScannerModal } from "./BarcodeScannerModal";
 import { formatSoles, formatWeight } from "../types";
 import type { CartLine, PosProductSearchItem } from "../types";
 
 type ItemSearchPanelProps = {
   onAdd: (line: Omit<CartLine, "quantity">) => void;
   onBack: () => void;
+  initialQuery?: string;
+  onCreateProduct: (barcode?: string) => void;
   cartCount: number;
   cartTotal: number;
 };
 
-export function ItemSearchPanel({ onAdd, onBack, cartCount, cartTotal }: ItemSearchPanelProps) {
-  const [query, setQuery] = useState("");
+export function ItemSearchPanel({
+  onAdd,
+  onBack,
+  initialQuery = "",
+  onCreateProduct,
+  cartCount,
+  cartTotal,
+}: ItemSearchPanelProps) {
+  const [query, setQuery] = useState(initialQuery);
   const [error, setError] = useState<string | null>(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [priceProductId, setPriceProductId] = useState<string | null>(null);
   const [priceDraft, setPriceDraft] = useState("");
+
+  useEffect(() => {
+    if (initialQuery) setQuery(initialQuery);
+  }, [initialQuery]);
 
   const searchQuery = useQuery({
     queryKey: ["pos", "products", query],
@@ -68,17 +83,19 @@ export function ItemSearchPanel({ onAdd, onBack, cartCount, cartTotal }: ItemSea
             <h2 className="text-base font-bold text-card-foreground">Agregar items</h2>
             <p className="text-xs text-muted-foreground">Escanea o busca por nombre, SKU o código de barras.</p>
           </div>
-          <Button type="button" variant="secondary" className="shrink-0" onClick={onBack}>
-            Ver venta
-          </Button>
         </div>
 
-        <Input
-          autoFocus
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Escanea o busca: leche, arroz, 775..."
-        />
+        <div className="flex gap-2">
+          <Input
+            autoFocus
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Escanea o busca: leche, arroz, 775..."
+          />
+          <Button type="button" variant="secondary" className="shrink-0" onClick={() => setIsScannerOpen(true)}>
+            Barcode
+          </Button>
+        </div>
       </section>
 
       {error ? (
@@ -93,7 +110,14 @@ export function ItemSearchPanel({ onAdd, onBack, cartCount, cartTotal }: ItemSea
         {searchQuery.isLoading ? (
           <p className="text-center text-sm text-muted-foreground">Buscando productos...</p>
         ) : products.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground">Sin resultados.</p>
+          <div className="grid gap-2 rounded-3xl border border-border bg-surface p-4 text-center text-sm text-muted-foreground">
+            <p>Sin resultados.</p>
+            {query.trim() ? (
+              <Button type="button" variant="secondary" onClick={() => onCreateProduct(query.trim())}>
+                Producto rápido
+              </Button>
+            ) : null}
+          </div>
         ) : (
           products.map((product) => {
             const isSettingPrice = priceProductId === product.id;
@@ -192,6 +216,16 @@ export function ItemSearchPanel({ onAdd, onBack, cartCount, cartTotal }: ItemSea
           Volver a cobrar
         </Button>
       </div>
+
+      <BarcodeScannerModal
+        open={isScannerOpen}
+        title="Escanear para buscar"
+        onDetected={(barcode) => {
+          setQuery(barcode);
+          setIsScannerOpen(false);
+        }}
+        onClose={() => setIsScannerOpen(false)}
+      />
     </div>
   );
 }

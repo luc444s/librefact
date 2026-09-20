@@ -189,6 +189,17 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - UI POS: búsqueda acota a 4 resultados (Frecuentes y demás), peso `weight_kg` con fallback `default_weight_kg`, acciones mínimas `+`/`$`, y modo inmersivo en `/app/pos` (header global oculto + sidebar drawer con hamburguesa flotante) vía `apps/web/src/shared/layout/AppLayout.tsx`.
   - Estado: implementación completa; metadata de commit/TRACE pendiente.
 
+- [ ] A.SPEC 0024 — POS ZXing barcode scanner
+  - Spec: `A-SPECS/0024-pos-zxing-barcode-scanner.md`.
+  - Objetivo: agregar escaneo de codigos de barras desde camara en POS mobile usando `@zxing/browser`.
+  - Reutiliza busqueda POS existente; sin backend/migraciones nuevas.
+  - Requiere HTTPS o `localhost` para pruebas reales de camara en celular.
+
+- [ ] A.SPEC 0025 — POS default route and mobile shell drawer
+  - Spec: `A-SPECS/0025-pos-default-mobile-shell.md`.
+  - Objetivo: hacer POS la ruta principal post-login y convertir el sidebar global en drawer mobile.
+  - Header global se oculta en mobile; desktop conserva sidebar/header.
+
 ## Reglas Del Camino
 
 - Cada A.SPEC debe ser test-first.
