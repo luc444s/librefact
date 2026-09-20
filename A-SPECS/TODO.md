@@ -227,6 +227,7 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - Parser CDR trata `ResponseCode=0` como aceptado aunque existan `cbc:Note` de observación.
   - Tests unitarios de mapper/CDR y suite PHP del adapter pasan; prueba real beta queda gated.
   - Commit del módulo ventas: `ff716d4`.
+  - Commit raíz (spec + tests adapter): `149b041`.
 
 ## Reglas Del Camino
 

@@ -238,7 +238,7 @@ Final acceptance check:
   and local CDR ZIP storage for SUNAT emission.
 - owner: agent
 - approver: lucas
-- Commit: `ff716d4` (plugins/ventas module), root adapter tests in a follow-up commit.
+- Commit: `149b041` (root), `ff716d4` (plugins/ventas module).
 - TRACE: `py_compile` PASS for mapper, emissions, models, schemas, and migration
   `0010`; `composer test` PASS in `services/greenter-adapter` (26 tests, 2
   skipped); `npm run typecheck` PASS; `npm run plugins:migrate` PASS with
