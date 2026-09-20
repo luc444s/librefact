@@ -135,10 +135,9 @@ public class MainActivity extends Activity {
             }
 
             Python py = Python.getInstance();
-            String stack = py.getModule("g5main").callAttr("probe").toString();
             String core = py.getModule("g5core")
                     .callAttr("run", files.getAbsolutePath()).toString();
-            out(stack + "\n--- systutor-core (postgresql) ---\n" + core);
+            out("--- systutor-core (postgresql) ---\n" + core);
 
             showWebApp();
         } catch (Throwable t) {

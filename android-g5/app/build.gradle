@@ -50,7 +50,6 @@ chaquopy {
             install("uvicorn")
             install("sqlalchemy")
             install("psycopg")
-            install("pg8000")
             install("greenlet")
             install("python-multipart")
             install("httpx")
