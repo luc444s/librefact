@@ -20,3 +20,13 @@ Re-run database startup, plugin migrations, and lightweight registry/load checks
 - `npm run db`
 - `npm run plugins:migrate`
 - `npm run typecheck`
+
+## Status (A.SPEC 0012)
+
+- All five plugin entrypoints import cleanly (previously `compras` and `ventas`
+  failed with `ModuleNotFoundError: plugins.logistics`).
+- `npm run plugins:migrate` PASS: crm=0005, productos=0010, compras=0020,
+  ventas=0002, stock=0009.
+- Known pre-existing gap: a migration-only fresh database still fails on
+  `crm/migrations/005` and `stock/migrations/006` due to `lg_*` tables. This is
+  outside the A.SPEC 0012 change surface and tracked as follow-up.

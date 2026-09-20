@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>POS Bodega - Mock</title>
+  <style>
+    :root {
+      --bg: #f6f3eb;
+      --surface: #fffaf0;
+      --card: #ffffff;
+      --ink: #1f2933;
+      --muted: #6b7280;
+      --line: #e7dcc8;
+      --brand: #f97316;
+      --brand-dark: #c2410c;
+      --ok: #16a34a;
+      --danger: #dc2626;
+      --blue: #2563eb;
+      --shadow: 0 10px 30px rgba(56, 36, 16, .12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(246, 243, 235, .96);
+      backdrop-filter: blur(10px);
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(231, 220, 200, .65);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.05;
+    }
+
+    .title span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ok);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .tabs {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 9px 5px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .tab.active {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    main {
+      padding: 14px;
+      padding-bottom: 96px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .stack { display: grid; gap: 12px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px;
+      box-shadow: 0 5px 18px rgba(56, 36, 16, .07);
+    }
+
+    .card-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card-title h2, .card-title h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .card-title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: var(--muted);
+      padding: 6px 9px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .cart-items { display: grid; gap: 10px; }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px dashed var(--line);
+      padding-bottom: 10px;
+    }
+
+    .cart-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .cart-item strong { display: block; font-size: 15px; }
+    .cart-item small { color: var(--muted); }
+
+    .qty {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: #f8fafc;
+      border-radius: 999px;
+      padding: 4px;
+      margin-top: 6px;
+      width: max-content;
+    }
+
+    .qty button {
+      border: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      font-weight: 900;
+    }
+
+    .item-total {
+      font-size: 16px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .total-box {
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: 0 5px 18px rgba(56, 36, 16, .07);
+    }
+
+    .total-box .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .grand-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .grand-total span { color: var(--muted); font-size: 13px; }
+    .grand-total strong { display: block; font-size: 28px; line-height: 1; }
+
+    .payment-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .payment-row button {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 10px 6px;
+      font-weight: 800;
+    }
+
+    .payment-row button.active { background: #ffedd5; border-color: var(--brand); color: var(--brand-dark); }
+
+    .primary, .secondary, .danger, .ghost {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-weight: 900;
+    }
+
+    .primary { background: var(--ok); color: #fff; }
+    .secondary { background: var(--brand); color: #fff; }
+    .danger { background: #fee2e2; color: var(--danger); }
+    .ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .actions.single { grid-template-columns: 1fr; }
+
+    .search {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .search input, .field input, .field select {
+      width: 100%;
+      border: 2px solid transparent;
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 12px;
+      outline: none;
+      box-shadow: 0 5px 18px rgba(56, 36, 16, .07);
+    }
+
+    .search input:focus, .field input:focus, .field select:focus { border-color: var(--brand); }
+
+    .scan {
+      border: 0;
+      border-radius: 14px;
+      background: var(--ink);
+      color: #fff;
+      width: 56px;
+      font-size: 22px;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .chip.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+    .products { display: grid; gap: 10px; }
+
+    .product {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 54px 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #fed7aa, #fff7ed);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: var(--brand-dark);
+    }
+
+    .product h3 { margin: 0; font-size: 15px; }
+    .product p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+
+    .price {
+      text-align: right;
+      font-weight: 900;
+      font-size: 16px;
+    }
+
+    .add {
+      display: block;
+      margin-top: 7px;
+      border: 0;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 800;
+    }
+
+    .mini-sale {
+      position: sticky;
+      bottom: 84px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+      margin-top: 12px;
+    }
+
+    .mini-sale button {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: var(--ok);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .form-grid { display: grid; gap: 11px; }
+
+    .field span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .stat span { display: block; color: var(--muted); font-size: 12px; }
+    .stat strong { display: block; margin-top: 5px; font-size: 22px; }
+
+    .sales-list { display: grid; gap: 8px; }
+
+    .sale-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px dashed var(--line);
+      padding-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      max-width: 1180px;
+      margin: 0 auto;
+      background: rgba(255, 250, 240, .96);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 8px;
+      gap: 6px;
+    }
+
+    .bottom-nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 12px;
+      padding: 8px 4px;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .bottom-nav button.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      place-items: center;
+      padding: 14px;
+      background: rgba(15, 23, 42, .45);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-backdrop.open { display: grid; }
+
+    .modal {
+      width: min(100%, 430px);
+      background: var(--card);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .28);
+      border: 1px solid var(--line);
+    }
+
+    .modal h2 {
+      margin: 0;
+      font-size: 19px;
+    }
+
+    .modal p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .confirm-total {
+      margin: 14px 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+    }
+
+    .confirm-total span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .confirm-total strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .qr-box {
+      margin: 14px auto;
+      width: 210px;
+      height: 210px;
+      border: 10px solid white;
+      border-radius: 18px;
+      background:
+        linear-gradient(90deg, #111 10px, transparent 10px) 0 0 / 20px 20px,
+        linear-gradient(#111 10px, transparent 10px) 0 0 / 20px 20px,
+        linear-gradient(45deg, transparent 35%, #111 35% 45%, transparent 45% 65%, #111 65% 75%, transparent 75%) 0 0 / 40px 40px,
+        #fff;
+      box-shadow: inset 0 0 0 1px #111, var(--shadow);
+      position: relative;
+    }
+
+    .qr-box::before,
+    .qr-box::after {
+      content: "";
+      position: absolute;
+      width: 52px;
+      height: 52px;
+      background: #fff;
+      border: 12px solid #111;
+      border-radius: 4px;
+    }
+
+    .qr-box::before { left: 14px; top: 14px; }
+    .qr-box::after { right: 14px; top: 14px; }
+
+    .qr-dot {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      width: 52px;
+      height: 52px;
+      background: #fff;
+      border: 12px solid #111;
+      border-radius: 4px;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (min-width: 820px) {
+      .app { grid-template-rows: auto 1fr; }
+      main { padding-bottom: 24px; }
+      .layout-wide { display: grid; grid-template-columns: 1fr 380px; gap: 14px; align-items: start; }
+      .products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bottom-nav {
+        top: 74px;
+        bottom: auto;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        max-width: 560px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+      }
+      .mini-sale { bottom: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="topbar">
+        <div class="title">
+          <strong>POS Bodega</strong>
+          <span>Caja principal · Turno mañana</span>
+        </div>
+        <div class="status">Caja abierta</div>
+      </div>
+    </header>
+
+    <main>
+      <section id="sale" class="screen active">
+        <div class="layout-wide">
+          <div class="stack">
+            <div class="card">
+              <div class="card-title">
+                <div>
+                  <h2>Venta rápida</h2>
+                  <p>Carrito limpio para cobrar sin distracciones.</p>
+                </div>
+                <span class="pill">4 items</span>
+              </div>
+
+              <div class="cart-items">
+                <div class="cart-item">
+                  <div>
+                    <strong>Leche en polvo Gloria</strong>
+                    <small>800 g · S/ 34.90 c/u</small>
+                    <div class="qty"><button>-</button><span>1</span><button>+</button></div>
+                  </div>
+                  <div class="item-total">S/ 34.90</div>
+                </div>
+                <div class="cart-item">
+                  <div>
+                    <strong>Agua San Luis</strong>
+                    <small>625 ml · S/ 2.00 c/u</small>
+                    <div class="qty"><button>-</button><span>2</span><button>+</button></div>
+                  </div>
+                  <div class="item-total">S/ 4.00</div>
+                </div>
+                <div class="cart-item">
+                  <div>
+                    <strong>Galleta Casino</strong>
+                    <small>43 g · S/ 1.20 c/u</small>
+                    <div class="qty"><button>-</button><span>1</span><button>+</button></div>
+                  </div>
+                  <div class="item-total">S/ 1.20</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="secondary" data-screen="items">+ Agregar productos</button>
+              <button class="danger">Cancelar venta</button>
+            </div>
+          </div>
+
+          <aside class="total-box">
+            <div class="row"><span>Subtotal</span><strong>S/ 40.10</strong></div>
+            <div class="row"><span>Descuento</span><strong>S/ 0.00</strong></div>
+            <div class="row"><span>Vuelto estimado</span><strong>S/ 9.90</strong></div>
+            <div class="payment-row">
+              <button class="active" data-payment="Efectivo">Efectivo</button>
+              <button data-payment="Yape/Plin">Yape/Plin</button>
+              <button data-payment="Tarjeta">Tarjeta</button>
+            </div>
+            <div class="grand-total">
+              <div><span>Total</span><strong>S/ 40.10</strong></div>
+              <button class="primary" id="chargeButton">Cobrar</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="items" class="screen">
+        <div class="stack">
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h2>Agregar items</h2>
+                <p>Escanea, busca por nombre o usa categorías rápidas.</p>
+              </div>
+              <button class="ghost" data-screen="sale">Ver venta</button>
+            </div>
+            <div class="search">
+              <input placeholder="Escanea o busca: leche, arroz, 775..." />
+              <button class="scan">⌁</button>
+            </div>
+            <div class="chips">
+              <button class="chip active">Frecuentes</button>
+              <button class="chip">Bebidas</button>
+              <button class="chip">Lácteos</button>
+              <button class="chip">Abarrotes</button>
+              <button class="chip">Snacks</button>
+              <button class="chip">Golosinas</button>
+            </div>
+          </div>
+
+          <section class="products">
+            <article class="product">
+              <div class="thumb">G</div>
+              <div><h3>Leche en polvo Gloria</h3><p>800 g · Stock 12 · 7751271013109</p></div>
+              <div class="price">S/ 34.90<button class="add">Agregar</button></div>
+            </article>
+            <article class="product">
+              <div class="thumb">SL</div>
+              <div><h3>Agua San Luis sin gas</h3><p>625 ml · Stock 38 · Bebidas</p></div>
+              <div class="price">S/ 2.00<button class="add">Agregar</button></div>
+            </article>
+            <article class="product">
+              <div class="thumb">DV</div>
+              <div><h3>Fideos Don Vittorio</h3><p>500 g · Stock 21 · Abarrotes</p></div>
+              <div class="price">S/ 4.80<button class="add">Agregar</button></div>
+            </article>
+            <article class="product">
+              <div class="thumb">IK</div>
+              <div><h3>Inca Kola original</h3><p>600 ml · Stock 18 · Bebidas</p></div>
+              <div class="price">S/ 3.50<button class="add">Agregar</button></div>
+            </article>
+          </section>
+
+          <div class="mini-sale">
+            <div><strong>4 items</strong><br><small>Total S/ 40.10</small></div>
+            <button data-screen="sale">Volver a cobrar</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="product" class="screen">
+        <div class="card">
+          <div class="card-title">
+            <div>
+              <h2>Producto rápido</h2>
+              <p>Para crear un producto sin salir del flujo de caja.</p>
+            </div>
+            <span class="pill">Nuevo</span>
+          </div>
+
+          <div class="form-grid">
+            <label class="field"><span>Barcode</span><input value="7751271013109" /></label>
+            <label class="field"><span>Nombre</span><input value="Leche en polvo Gloria" /></label>
+            <div class="split">
+              <label class="field"><span>Precio venta</span><input value="34.90" /></label>
+              <label class="field"><span>Stock inicial</span><input value="12" /></label>
+            </div>
+            <div class="split">
+              <label class="field"><span>Peso kg</span><input value="0.800" /></label>
+              <label class="field"><span>Categoría</span><select><option>Lácteos</option><option>Bebidas</option><option>Abarrotes</option></select></label>
+            </div>
+            <label class="field"><span>Imagen</span><input placeholder="URL opcional o foto luego" /></label>
+            <div class="actions">
+              <button class="ghost" data-screen="items">Cancelar</button>
+              <button class="primary">Guardar y agregar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="close" class="screen">
+        <div class="stack">
+          <div class="card">
+            <div class="card-title">
+              <div>
+                <h2>Cierre de caja</h2>
+                <p>Resumen del turno antes de cerrar.</p>
+              </div>
+              <span class="pill">Turno 09:00-14:00</span>
+            </div>
+            <div class="stats">
+              <div class="stat"><span>Total vendido</span><strong>S/ 684.50</strong></div>
+              <div class="stat"><span>Ventas</span><strong>37</strong></div>
+              <div class="stat"><span>Efectivo</span><strong>S/ 312.10</strong></div>
+              <div class="stat"><span>Yape/Plin</span><strong>S/ 248.40</strong></div>
+              <div class="stat"><span>Tarjeta</span><strong>S/ 124.00</strong></div>
+              <div class="stat"><span>Anuladas</span><strong>1</strong></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><h3>Últimas ventas</h3><span class="pill">Hoy</span></div>
+            <div class="sales-list">
+              <div class="sale-row"><span>#V-0037 · Efectivo</span><strong>S/ 40.10</strong></div>
+              <div class="sale-row"><span>#V-0036 · Yape</span><strong>S/ 18.50</strong></div>
+              <div class="sale-row"><span>#V-0035 · Tarjeta</span><strong>S/ 72.00</strong></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="ghost">Imprimir resumen</button>
+            <button class="danger">Cerrar caja</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navegación POS móvil">
+      <button class="active" data-screen="sale">Venta</button>
+      <button data-screen="items">Agregar</button>
+      <button data-screen="product">Producto</button>
+      <button data-screen="close">Cierre</button>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop" id="paymentModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 id="modalTitle">Confirmar cobro</h2>
+      <p id="modalDescription">Confirma que el cliente pagó antes de registrar la venta.</p>
+
+      <div id="qrContent" hidden>
+        <div class="qr-box" aria-label="QR mock Yape Plin"><span class="qr-dot"></span></div>
+        <p style="text-align:center">Mostrar este QR al cliente y confirma cuando el pago aparezca recibido.</p>
+      </div>
+
+      <div class="confirm-total">
+        <div>
+          <span>Método</span>
+          <strong id="modalPaymentMethod">Efectivo</strong>
+        </div>
+        <div style="text-align:right">
+          <span>Total</span>
+          <strong>S/ 40.10</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="ghost" id="cancelPayment">No</button>
+        <button class="primary" id="confirmPayment">Sí, cobrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll('[data-screen]');
+    const screens = document.querySelectorAll('.screen');
+    const paymentButtons = document.querySelectorAll('[data-payment]');
+    const chargeButton = document.querySelector('#chargeButton');
+    const paymentModal = document.querySelector('#paymentModal');
+    const modalTitle = document.querySelector('#modalTitle');
+    const modalDescription = document.querySelector('#modalDescription');
+    const modalPaymentMethod = document.querySelector('#modalPaymentMethod');
+    const qrContent = document.querySelector('#qrContent');
+    const cancelPayment = document.querySelector('#cancelPayment');
+    const confirmPayment = document.querySelector('#confirmPayment');
+    let selectedPayment = 'Efectivo';
+
+    function showScreen(id) {
+      screens.forEach((screen) => screen.classList.toggle('active', screen.id === id));
+      buttons.forEach((button) => button.classList.toggle('active', button.dataset.screen === id));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => showScreen(button.dataset.screen));
+    });
+
+    paymentButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedPayment = button.dataset.payment;
+        paymentButtons.forEach((item) => item.classList.toggle('active', item === button));
+      });
+    });
+
+    function openPaymentModal() {
+      const isQrPayment = selectedPayment === 'Yape/Plin';
+      modalPaymentMethod.textContent = selectedPayment;
+      qrContent.hidden = !isQrPayment;
+      modalTitle.textContent = isQrPayment ? 'Cobro con Yape/Plin' : `Confirmar ${selectedPayment}`;
+      modalDescription.textContent = isQrPayment
+        ? 'Muestra el QR y confirma solo cuando el pago figure como recibido.'
+        : 'Confirma que el cliente pagó antes de registrar la venta.';
+      confirmPayment.textContent = isQrPayment ? 'Pago recibido' : 'Sí, cobrar';
+      paymentModal.classList.add('open');
+    }
+
+    function closePaymentModal() {
+      paymentModal.classList.remove('open');
+    }
+
+    chargeButton.addEventListener('click', openPaymentModal);
+    cancelPayment.addEventListener('click', closePaymentModal);
+    confirmPayment.addEventListener('click', closePaymentModal);
+    paymentModal.addEventListener('click', (event) => {
+      if (event.target === paymentModal) closePaymentModal();
+    });
+  </script>
+</body>
+</html>

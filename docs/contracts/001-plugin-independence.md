@@ -19,3 +19,11 @@ Imported business plugins must load and migrate as root `plugins/*` modules in L
 
 - Search shows no active `plugins.logistics` imports in required commerce, stock, or ventas migration/load paths.
 - `npm run plugins:migrate` completes after `npm run db` on a fresh local database.
+
+## Status (A.SPEC 0012)
+
+- No active module under `plugins/**` imports `plugins.logistics` anymore; the
+  dangling imports that broke `compras` and `ventas` plugin load were removed.
+- Residual `lg_*` references remain only as inert history in `crm/migrations/003`
+  and `stock/migrations/006`, plus the pre-existing fresh-database gap documented
+  in A.SPEC 0012 (crm 005 / stock 006).

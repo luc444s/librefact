@@ -1,0 +1,29 @@
+{
+  "id": "pos",
+  "name": "POS Bodega",
+  "version": "0.1.0",
+  "api_version": "1",
+  "requires": [
+    "ventas",
+    "productos",
+    "stock",
+    "configuracion"
+  ],
+  "backend_entrypoint": "backend.plugin:register",
+  "frontend_entrypoint": "frontend/register.tsx",
+  "permissions": [
+    "pos.session.read",
+    "pos.session.manage",
+    "pos.sale.create",
+    "pos.product.quick_create",
+    "pos.product.price"
+  ],
+  "events": [
+    "pos.session.opened",
+    "pos.session.closed",
+    "pos.sale.completed",
+    "pos.product.quick_created",
+    "pos.product.price_set"
+  ],
+  "description": "Caja móvil para bodegas: sesiones de caja, pagos, checkout con BOLETA anónima y producto rápido, reutilizando ventas, stock y productos. Sin IGV y sin emisión SUNAT."
+}

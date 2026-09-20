@@ -177,6 +177,18 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - SUNAT beta accepted boleta `B001-75854` with `CDR_CODE: 0`.
   - `composer test` PASS.
 
+- [x] A.SPEC 0023 — POS bodega mobile sales module
+  - Spec: `A-SPECS/0023-pos-bodega-module.md`.
+  - Plugin nuevo `plugins/pos` con sesiones de caja, pagos, checkout y producto rápido.
+  - Reutiliza `ventas`, `stock`, `productos` y `configuracion`; sin IGV y sin emisión SUNAT.
+  - No test-first por decisión del usuario: verificación con `py_compile`, `plugins:migrate`, `typecheck` y smoke HTTP/DB.
+  - Verificación: `py_compile` PASS; `npm run typecheck` PASS; migración `0001` aplicada y downgrade ejecutado/demostrado; smoke HTTP autenticado open → productos/quick → checkout → current/summary → close PASS; smoke DB (orden `BOLETA` `DISPATCHED`, `stk_ledger.sale_out`, `pos_payments`) PASS; checkout con caja cerrada devuelve error de negocio sin crear orden.
+  - Activación: por decisión del approver, `scripts/systutor-plugins-migrate.sh` no se modifica; `pos` se migra/habilita vía la API de plugins del core (`upgrade_plugin` + `enable_plugin`) con permisos `pos.*` al rol admin.
+  - Incremento "productos sin precio": `GET /products/search` devuelve `price` nullable (LEFT JOIN a `prod_prices`, UNITARIO vigente, sin N+1); `POST /products/{id}/price` fija un precio `UNITARIO` persistido. El POS muestra badge "Sin precio" y permite fijarlo inline antes de agregar al carrito; el checkout sigue exigiendo precio vigente. No requiere migración (`prod_prices` ya existe).
+  - Verificación del incremento: `py_compile` incluye `services/catalog.py`; `npm run typecheck` PASS; `npm --prefix apps/web run build` PASS; smoke HTTP de `/products/search?q=...` (price o `null`) y `/products/{id}/price`.
+  - UI POS: búsqueda acota a 4 resultados (Frecuentes y demás), peso `weight_kg` con fallback `default_weight_kg`, acciones mínimas `+`/`$`, y modo inmersivo en `/app/pos` (header global oculto + sidebar drawer con hamburguesa flotante) vía `apps/web/src/shared/layout/AppLayout.tsx`.
+  - Estado: implementación completa; metadata de commit/TRACE pendiente.
+
 ## Reglas Del Camino
 
 - Cada A.SPEC debe ser test-first.
