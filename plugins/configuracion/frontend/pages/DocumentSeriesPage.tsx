@@ -28,6 +28,12 @@ const EMPTY_FORM: FormState = {
   is_active: true,
 };
 
+const DEFAULT_SERIES: Record<DocumentType, string> = {
+  FACTURA: "F001",
+  BOLETA: "B001",
+  NOTA_VENTA: "N001",
+};
+
 export function DocumentSeriesPage() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -111,7 +117,7 @@ export function DocumentSeriesPage() {
       <div>
         <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Configuración / Facturación</p>
         <h1 className="text-2xl font-semibold text-foreground">Series y correlativos</h1>
-        <p className="text-sm text-muted-foreground">Configura FACTURA y BOLETA sin reservar numeración fiscal.</p>
+        <p className="text-sm text-muted-foreground">Configura FACTURA, BOLETA y NOTA DE VENTA sin reservar numeración fiscal.</p>
       </div>
 
       {seriesQuery.error ? <Alert title="No se pudo cargar series">{seriesQuery.error.message}</Alert> : null}
@@ -133,7 +139,7 @@ export function DocumentSeriesPage() {
                   setForm((current) => ({
                     ...current,
                     document_type: value as DocumentType,
-                    series: value === "BOLETA" ? "B001" : "F001",
+                    series: DEFAULT_SERIES[value as DocumentType],
                   }))
                 }
                 disabled={editing !== null}
@@ -141,6 +147,7 @@ export function DocumentSeriesPage() {
                 options={[
                   { value: "FACTURA", label: "Factura" },
                   { value: "BOLETA", label: "Boleta" },
+                  { value: "NOTA_VENTA", label: "Nota de venta" },
                 ]}
               />
               <Input

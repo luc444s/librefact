@@ -58,7 +58,7 @@ def checkout(
     order = orders_service.create_order(
         db,
         tenant_id=session.tenant_id,
-        document_type="BOLETA",
+        document_type="NOTA_VENTA",
         customer_id=None,
         customer_name=None,
         customer_document_type=None,

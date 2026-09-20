@@ -1,4 +1,4 @@
-export type DocumentType = "FACTURA" | "BOLETA";
+export type DocumentType = "FACTURA" | "BOLETA" | "NOTA_VENTA";
 
 export type DocumentSeries = {
   id: string;

@@ -5,12 +5,13 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-DocumentType = Literal["FACTURA", "BOLETA"]
+DocumentType = Literal["FACTURA", "BOLETA", "NOTA_VENTA"]
 
 
 def _validate_series(document_type: str, series: str) -> str:
     value = series.strip().upper()
-    prefix = "F" if document_type == "FACTURA" else "B"
+    prefixes = {"FACTURA": "F", "BOLETA": "B", "NOTA_VENTA": "N"}
+    prefix = prefixes[document_type]
     if len(value) != 4 or not value.startswith(prefix) or not value[1:].isdigit():
         raise ValueError(f"{document_type} series must match {prefix}###")
     return value

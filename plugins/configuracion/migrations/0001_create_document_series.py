@@ -23,11 +23,13 @@ def upgrade(db) -> None:
                 created_by VARCHAR(36) NOT NULL REFERENCES users(id),
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                CONSTRAINT ck_cfg_document_series_type CHECK (document_type IN ('FACTURA', 'BOLETA')),
+                CONSTRAINT ck_cfg_document_series_type CHECK (document_type IN ('FACTURA', 'BOLETA', 'NOTA_VENTA', 'ORDEN_COMPRA')),
                 CONSTRAINT ck_cfg_document_series_numbers CHECK (initial_number >= 1 AND next_number >= 1),
                 CONSTRAINT ck_cfg_document_series_format CHECK (
                     (document_type = 'FACTURA' AND series ~ '^F[0-9]{3}$') OR
-                    (document_type = 'BOLETA' AND series ~ '^B[0-9]{3}$')
+                    (document_type = 'BOLETA' AND series ~ '^B[0-9]{3}$') OR
+                    (document_type = 'NOTA_VENTA' AND series ~ '^N[0-9]{3}$') OR
+                    (document_type = 'ORDEN_COMPRA' AND series ~ '^OC$')
                 ),
                 CONSTRAINT ck_cfg_document_series_default_active CHECK (is_default = FALSE OR is_active = TRUE)
             )
