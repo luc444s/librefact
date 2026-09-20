@@ -88,7 +88,7 @@ final class EmitDocumentGreenterMapper
             ->setCantidad($item->quantity)
             ->setMtoValorUnitario($item->unitValue)
             ->setMtoBaseIgv($taxable)
-            ->setPorcentajeIgv(18.0)
+            ->setPorcentajeIgv($item->taxRate)
             ->setIgv($item->igv)
             ->setTipAfeIgv('10')
             ->setTotalImpuestos($item->igv)

@@ -248,6 +248,9 @@ final class EmitDocumentPayloadValidator
             $this->requiredNumber($item, $field . '.unit_value', 0.0, true, $errors);
             $this->requiredNumber($item, $field . '.igv', 0.0, true, $errors);
             $this->requiredNumber($item, $field . '.total', 0.0, true, $errors);
+            if (array_key_exists('tax_rate', $item)) {
+                $this->requiredNumber($item, $field . '.tax_rate', 0.0, true, $errors);
+            }
 
             if (
                 $this->isNumber($item['quantity'] ?? null)

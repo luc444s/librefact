@@ -49,7 +49,8 @@ final class EmitDocumentRequestMapper
                     (float) $item['quantity'],
                     (float) $item['unit_value'],
                     (float) $item['igv'],
-                    (float) $item['total']
+                    (float) $item['total'],
+                    (float) ($item['tax_rate'] ?? 18.0)
                 ),
                 $payload['items']
             ),
@@ -64,10 +65,10 @@ final class EmitDocumentRequestMapper
     /**
      * @param mixed $payload
      */
-    private function addressFromPayload($payload): ?Address
+    private function addressFromPayload($payload): Address
     {
         if (!is_array($payload)) {
-            return null;
+            return new Address(codLocal: '0000');
         }
 
         return new Address(
