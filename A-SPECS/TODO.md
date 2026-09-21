@@ -239,6 +239,30 @@ Estado actual del plan test-first para integrar Greenter en Librefact.
   - Commit del módulo ventas: `ff716d4`.
   - Commit raíz (spec + tests adapter): `149b041`.
 
+- [ ] A.SPEC 0030 — Generic tax product and unit codes
+  - Spec: `A-SPECS/0030-tax-product-and-unit-codes.md`.
+  - Modelos y migración `productos=0011` agregan `tax_products`, `tax_product_hints`, `tax_units`, `prod_products.tax_product_*` y `prod_units.tax_unit_*`.
+  - Servicios de productos/unidades persisten y listan los campos fiscales nuevos.
+  - `sales_mapper` propaga `sku`, `product_code/product_scheme` y `unit_code/unit_scheme` por item.
+  - Adapter usa `unit_code` para `unidad`, `sku` para `codProducto`, `product_code` para `codProdSunat`, con fallback `ZZ`/`SERVICE`.
+  - Commit/TRACE pendiente.
+
+- [ ] A.SPEC 0031 — Separate SKU and barcode in products
+  - Spec: `A-SPECS/0031-separate-sku-and-barcode.md`.
+  - Objetivo: separar SKU interno y barcode escaneable en productos.
+  - Frontend productos debe mostrar ambos: `SKU` y `Barcode`.
+  - Backfill debe mover SKUs con forma de barcode a `prod_barcodes` y generar SKU interno unico.
+  - Facturación mantiene `sku` como `codProducto`; barcode queda como dato operativo/escaneable.
+  - Commit/TRACE pendiente.
+
+- [x] A.SPEC 0032 — Boleta DNI validation in frontend
+  - Spec: `A-SPECS/0032-boleta-dni-validation-frontend.md`.
+  - BOLETA auto-sets customer_document_type to "1" (DNI) and disables the input.
+  - customer_document_number validated with `/^\d{8}$/` before submit.
+  - Submit button disabled when boleta has invalid document number.
+  - No backend changes; validation already existed in EmitDocumentPayloadValidator.
+  - Commit: `0499371`.
+
 ## Reglas Del Camino
 
 - Cada A.SPEC debe ser test-first.

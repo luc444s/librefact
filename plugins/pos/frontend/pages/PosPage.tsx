@@ -312,7 +312,6 @@ export function PosPage() {
       {screen === "items" ? (
         <ItemSearchPanel
           onAdd={addLine}
-          onBack={() => setScreen("sale")}
           initialQuery={itemsInitialQuery}
           onCreateProduct={openQuickProduct}
           cartCount={cartCount}

@@ -52,6 +52,7 @@ final class EmitDocumentGreenterMapperTest extends TestCase
         $detail = $invoice->getDetails()[0];
         self::assertSame('ZZ', $detail->getUnidad());
         self::assertSame('SERVICE', $detail->getCodProducto());
+        self::assertNull($detail->getCodProdSunat());
         self::assertSame('Servicio demo', $detail->getDescripcion());
         self::assertSame(1.0, $detail->getCantidad());
         self::assertSame(100.0, $detail->getMtoValorUnitario());
@@ -88,6 +89,24 @@ final class EmitDocumentGreenterMapperTest extends TestCase
         self::assertSame('B001', $invoice->getSerie());
         self::assertSame('1', $invoice->getClient()->getTipoDoc());
         self::assertSame('20203030', $invoice->getClient()->getNumDoc());
+    }
+
+    public function testItemFiscalCodesMapToGreenterDetail(): void
+    {
+        $payload = $this->validPayload();
+        $payload['items'][0]['sku'] = '7750670014984';
+        $payload['items'][0]['product_code'] = '50202306';
+        $payload['items'][0]['product_scheme'] = 'UNSPSC';
+        $payload['items'][0]['unit_code'] = 'NIU';
+        $payload['items'][0]['unit_scheme'] = 'SUNAT_03';
+
+        $request = (new EmitDocumentRequestMapper())->fromPayload($payload);
+        $invoice = (new EmitDocumentGreenterMapper())->toInvoice($request);
+        $detail = $invoice->getDetails()[0];
+
+        self::assertSame('NIU', $detail->getUnidad());
+        self::assertSame('7750670014984', $detail->getCodProducto());
+        self::assertSame('50202306', $detail->getCodProdSunat());
     }
 
     /**

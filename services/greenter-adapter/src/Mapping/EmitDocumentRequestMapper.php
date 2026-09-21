@@ -50,7 +50,12 @@ final class EmitDocumentRequestMapper
                     (float) $item['unit_value'],
                     (float) $item['igv'],
                     (float) $item['total'],
-                    (float) ($item['tax_rate'] ?? 18.0)
+                    (float) ($item['tax_rate'] ?? 18.0),
+                    isset($item['product_code']) ? (string) $item['product_code'] : '',
+                    isset($item['product_scheme']) ? (string) $item['product_scheme'] : '',
+                    isset($item['unit_code']) ? (string) $item['unit_code'] : '',
+                    isset($item['unit_scheme']) ? (string) $item['unit_scheme'] : '',
+                    isset($item['sku']) ? (string) $item['sku'] : ''
                 ),
                 $payload['items']
             ),

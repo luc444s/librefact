@@ -48,6 +48,9 @@ final class EmitDocumentRequestMapperTest extends TestCase
         self::assertSame(100.0, $request->items[0]->unitValue);
         self::assertSame(18.0, $request->items[0]->igv);
         self::assertSame(118.0, $request->items[0]->total);
+        self::assertSame('', $request->items[0]->productCode);
+        self::assertSame('', $request->items[0]->sku);
+        self::assertSame('', $request->items[0]->unitCode);
 
         self::assertSame(100.0, $request->totals->taxable);
         self::assertSame(18.0, $request->totals->igv);
@@ -63,6 +66,24 @@ final class EmitDocumentRequestMapperTest extends TestCase
 
         self::assertNotNull($request->issuer->address);
         self::assertSame('0000', $request->issuer->address->codLocal);
+    }
+
+    public function testItemFiscalCodesMapToDocumentItem(): void
+    {
+        $payload = $this->validPayload();
+        $payload['items'][0]['sku'] = '7750670014984';
+        $payload['items'][0]['product_code'] = '50202306';
+        $payload['items'][0]['product_scheme'] = 'UNSPSC';
+        $payload['items'][0]['unit_code'] = 'NIU';
+        $payload['items'][0]['unit_scheme'] = 'SUNAT_03';
+
+        $request = (new EmitDocumentRequestMapper())->fromPayload($payload);
+
+        self::assertSame('7750670014984', $request->items[0]->sku);
+        self::assertSame('50202306', $request->items[0]->productCode);
+        self::assertSame('UNSPSC', $request->items[0]->productScheme);
+        self::assertSame('NIU', $request->items[0]->unitCode);
+        self::assertSame('SUNAT_03', $request->items[0]->unitScheme);
     }
 
     /**

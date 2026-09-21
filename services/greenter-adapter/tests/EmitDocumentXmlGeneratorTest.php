@@ -68,6 +68,25 @@ final class EmitDocumentXmlGeneratorTest extends TestCase
         self::assertStringContainsString('PERSON 1', $xml);
     }
 
+    public function testFiscalProductAndUnitCodesAreRenderedInXml(): void
+    {
+        $payload = $this->validPayload();
+        $payload['items'][0]['sku'] = '7750670014984';
+        $payload['items'][0]['product_code'] = '50202306';
+        $payload['items'][0]['product_scheme'] = 'UNSPSC';
+        $payload['items'][0]['unit_code'] = 'NIU';
+        $payload['items'][0]['unit_scheme'] = 'SUNAT_03';
+
+        $request = (new EmitDocumentRequestMapper())->fromPayload($payload);
+        $xml = (new EmitDocumentXmlGenerator())->generate($request);
+
+        self::assertStringContainsString('<cbc:InvoicedQuantity unitCode="NIU">1</cbc:InvoicedQuantity>', $xml);
+        self::assertStringContainsString('<cac:SellersItemIdentification>', $xml);
+        self::assertStringContainsString('<cbc:ID>7750670014984</cbc:ID>', $xml);
+        self::assertStringContainsString('<cbc:ItemClassificationCode', $xml);
+        self::assertStringContainsString('>50202306</cbc:ItemClassificationCode>', $xml);
+    }
+
     /**
      * @return array<string, mixed>
      */

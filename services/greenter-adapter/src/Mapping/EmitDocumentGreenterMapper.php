@@ -81,9 +81,9 @@ final class EmitDocumentGreenterMapper
     {
         $taxable = $item->unitValue * $item->quantity;
 
-        return (new SaleDetail())
-            ->setUnidad('ZZ')
-            ->setCodProducto('SERVICE')
+        $detail = (new SaleDetail())
+            ->setUnidad($item->unitCode ?: 'ZZ')
+            ->setCodProducto($item->sku ?: 'SERVICE')
             ->setDescripcion($item->description)
             ->setCantidad($item->quantity)
             ->setMtoValorUnitario($item->unitValue)
@@ -94,5 +94,11 @@ final class EmitDocumentGreenterMapper
             ->setTotalImpuestos($item->igv)
             ->setMtoPrecioUnitario($item->total / $item->quantity)
             ->setMtoValorVenta($taxable);
+
+        if ($item->productCode !== '') {
+            $detail->setCodProdSunat($item->productCode);
+        }
+
+        return $detail;
     }
 }

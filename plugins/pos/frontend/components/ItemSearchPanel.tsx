@@ -10,7 +10,6 @@ import type { CartLine, PosProductSearchItem } from "../types";
 
 type ItemSearchPanelProps = {
   onAdd: (line: Omit<CartLine, "quantity">) => void;
-  onBack: () => void;
   initialQuery?: string;
   onCreateProduct: (barcode?: string) => void;
   cartCount: number;
@@ -19,7 +18,6 @@ type ItemSearchPanelProps = {
 
 export function ItemSearchPanel({
   onAdd,
-  onBack,
   initialQuery = "",
   onCreateProduct,
   cartCount,
@@ -205,15 +203,12 @@ export function ItemSearchPanel({
         )}
       </section>
 
-      <div className="sticky bottom-24 z-30 flex items-center justify-between gap-3 rounded-3xl bg-sidebar px-4 py-3 text-sidebar-foreground shadow-lg">
+      <div className="sticky bottom-24 z-30 rounded-3xl bg-sidebar px-4 py-3 text-sidebar-foreground shadow-lg">
         <div className="text-sm">
           <strong>{cartCount} items</strong>
           <br />
           <span className="text-xs opacity-80">Total {formatSoles(cartTotal)}</span>
         </div>
-        <Button type="button" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={onBack}>
-          Volver a cobrar
-        </Button>
       </div>
 
       <BarcodeScannerModal
