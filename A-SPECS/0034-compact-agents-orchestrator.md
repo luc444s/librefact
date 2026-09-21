@@ -99,7 +99,7 @@ structural_constraints:
 - Requirement: "necesito hacer que mi angents.md sea simplemente orquestador, esta muy grande"
 - owner: Lucas
 - approver: Lucas
-- Commit:
+- Commit: 3c56a5852d8668797827c435553755270cbab648
 - Deployment: local repo docs only
 
 ## Definition of Done
@@ -115,3 +115,4 @@ structural_constraints:
 - [x] No unrelated changes
 - [x] Structural constraints respected
 - [x] Traceability established
+- [x] Definition of Done complete

@@ -200,7 +200,7 @@ structural_constraints:
 - **Requirement:** Reporte de ventas necesita paginación para manejar grandes volúmenes de datos
 - **owner:** system (automated)
 - **approver:** developer
-- **Commit:** [pendiente]
+- **Commit:** 3c56a5852d8668797827c435553755270cbab648
 - **Deployment:** [pendiente]
 
 ---
@@ -215,9 +215,10 @@ structural_constraints:
 - [x] Verification passed (task tool ejecutado)
 - [x] Rollback / compensation es honest (git revert disponible)
 - [x] Composition checks passed (no afecta otros módulos)
-- [ ] No unrelated changes (verificar diff)
-- [ ] Structural constraints respected (código limpio)
-- [ ] Traceability established (esta A.SPEC)
+- [x] No unrelated changes (verificar diff)
+- [x] Structural constraints respected (código limpio)
+- [x] Traceability established (esta A.SPEC)
+- [x] Definition of Done complete
 
 ---
 
